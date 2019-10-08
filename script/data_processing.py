@@ -1,5 +1,7 @@
 import time
+import nltk
 import itertools
+import csv
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,13 +9,16 @@ import seaborn as sns
 from tqdm import tqdm
 from numpy import transpose as T
 from scipy.stats import stats
-import csv
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.tokenize import RegexpTokenizer
+from nltk.corpus import stopwords
+
 sns.set()
 # 1.0 Processing Data
 #------------------------------------------------------------------------------
 # 1.1 Load file
 #------------------------------------------------------------------------------
-training_data_df = pd.read_csv('../data/reddit_train.csv')
+training_data_df = pd.read_csv('../data/original_data/reddit_train.csv')
 # 1.2 Extract all subreddits
 #------------------------------------------------------------------------------
 list_of_subreddit = []
@@ -28,7 +33,10 @@ for category in training_data_df['subreddits']:
     else:
         i = 0
 print(list_of_subreddit)
-
+# Write to a file
+subreddit_df = pd.DataFrame(data=list_of_subreddit)
+subreddit_df.to_csv('../data/subreddits.csv', sep=',',index=False)
+   
 # 1.3 Count for occurances
 #------------------------------------------------------------------------------
 #Now count for occurances
@@ -42,7 +50,7 @@ count_df = training_data_df.stack().value_counts().to_frame('occurrence').loc[li
 '''
 ONLY NEED TO RUN ONCE
 '''
-with open('../data/reddit_train.csv') as fin:    
+with open('../data/original_data/reddit_train.csv') as fin:    
     csvin = csv.DictReader(fin)
     # Category -> open file lookup
     outputs = {}
@@ -59,6 +67,7 @@ with open('../data/reddit_train.csv') as fin:
     # Close all the files
     for fout, _ in outputs.values():
         fout.close()  
+        
 
     
     
