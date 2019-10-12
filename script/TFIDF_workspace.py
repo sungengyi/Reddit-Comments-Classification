@@ -81,13 +81,13 @@ def binarize(X):
                 X[i,j]=0
 
 def test():
-    diff = 0
-    nb_samples = 1000
+
+    nb_samples = 200
     nb_rounds = 25
     x = np.zeros((nb_rounds))
     y = np.zeros((nb_rounds))
     for i in range(nb_rounds):
-        bnbdata_X, bnbdata_Y = make_classification(n_samples=nb_samples, n_features=4, n_informative=4,n_classes=4, n_redundant=0)
+        bnbdata_X, bnbdata_Y = make_classification(n_samples=nb_samples, n_features=20, n_informative=20,n_classes=5, n_redundant=0)
         
         binarize(bnbdata_X)
         bnb = MultinomialNB()

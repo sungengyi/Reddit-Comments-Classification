@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from sklearn.utils import check_X_y
 
 class NaiveBayes:
     def __init__(self, num_class = 2, ls = True):
@@ -8,6 +9,8 @@ class NaiveBayes:
         
         
     def fit(self, X_features, Y_quality):
+        X_features, Y_quality = check_X_y(X_features, Y_quality, accept_sparse='csr', dtype='float', order="C",
+                                          accept_large_sparse='warn' != 'liblinear')
         self.X_features = X_features
         self.Y_outcomes = Y_quality
         self.n,self.m = self.X_features.shape
