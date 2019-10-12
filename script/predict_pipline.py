@@ -17,6 +17,7 @@ from tqdm import tqdm
 from numpy import transpose as T
 from scipy.stats import stats
 from sklearn import tree
+from scipy.stats import mode
 
 
 from sklearn.feature_extraction.text import CountVectorizer
@@ -39,8 +40,12 @@ def accuracy(predicted,true_outcome,num):
             accuracy+=1
         index+=1
     print("-----Accuracy:", accuracy/num)
-    
-    
+
+def votepredict(tot_predicted):
+    tot_predicted = np.transpose(tot_predicted)
+    vote_predicted = [mode(w) for w in tot_predicted]
+    return vote_predicted
+tot_predicted = []
     
 start_time = time.time()
 #load file
@@ -67,6 +72,7 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 # 1. 3 multinomial naive bayes: predicting
 #------------------------------------------------------------------------------
 mnb_predicted = mnb_train_clf.predict(training_data_df['comments'][:num_test_data])
+tot_predicted = tot_predicted.append(mnb_predicted)
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
@@ -117,6 +123,7 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 # 3. 3 logistic regression: predicting
 #------------------------------------------------------------------------------
 lr_predicted = lr_train_clf.predict(training_data_df['comments'][:num_test_data])
+tot_predicted = tot_predicted.append(lr_predicted)
 # 3. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(lr_predicted,training_data_df['subreddit_encoding'], num_test_data)
@@ -179,6 +186,7 @@ svm_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encod
 # 6. 3 svm: predicting
 #------------------------------------------------------------------------------
 svm_predicted = svm_train_clf.predict(training_data_df['comments'])
+tot_predicted = tot_predicted.append(svm_predicted)
 # 6. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(svm_predicted,training_data_df['subreddit_encoding'], num_test_data)
