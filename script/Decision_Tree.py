@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Oct 11 18:35:03 2019
+Created on Fri Oct 11 20:38:29 2019
 
 @author: sunge
 """
-import nltk
+import time
 import csv
 import numpy as np
 import pandas as pd
@@ -14,24 +14,13 @@ import string
 from tqdm import tqdm
 from numpy import transpose as T
 from scipy.stats import stats
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk.tokenize import RegexpTokenizer
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer 
-from nltk.stem.snowball import SnowballStemmer
 from sklearn import tree
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
-from NaiveBayes import NB
-
-#---------------------------------------------------------------------------
-#X = [[0,0],[1,1]]
-#Y = [0,1]
-#clf = tree.DecisionTreeClassifier()
-#clf = clf.fit(X,Y)
-#print(clf.predict([[2.,2.]]))
-#------------------------------------------------------------------
+from sklearn import tree
+#encoding subreddits
+#------------------------------------------------------------------------------
 def encode_subreddit(argument):
     switch = {
            "hockey":0,
@@ -56,34 +45,51 @@ def encode_subreddit(argument):
             "baseball":19,             
             }
     return switch.get(argument,20)
-#------------------------------------------------------------------------------
-#encode subreddit
 
-encode = []
-training_data_df = pd.read_csv('../data/original_data/reddit_train.csv')
-for subreddit in training_data_df['subreddits']:
-    encode.append(encode_subreddit(subreddit))
-training_data_df['subreddit_encoding'] = encode
-training_data_df.to_csv(r'../data/encoded_reddit_train.csv',',')
+start_time = time.time()
+#load file
+#------------------------------------------------------------------------------
+training_data_df = pd.read_csv('../data/encoded_reddit_train.csv')
+finish_time = time.time()
+print("-----File Loaded in {} sec".format(finish_time - start_time))
 
 #tokenize
-#------------------------------------------------------------------------------   
+#------------------------------------------------------------------------------ 
+start_time = time.time()
+num_test_data = 60000  
 count_vect = CountVectorizer()
-train_counts = count_vect.fit_transform(training_data_df['comments'][20000:])
+train_counts = count_vect.fit_transform(training_data_df['comments'][num_test_data:])
 print(train_counts.shape)
+finish_time = time.time()
+print("-----Tokenized in {} sec".format(finish_time - start_time))
+
 
 #tf idf
 #------------------------------------------------------------------------------
+start_time = time.time()
 tfidf_transformer = TfidfTransformer()
 train_tfidf = tfidf_transformer.fit_transform(train_counts)
 print(train_tfidf.shape)
+finish_time = time.time()
 
-#train model
-#------------------------------------------------------------------------------
-clf = MultinomialNB().fit(train_tfidf,training_data_df['subreddit_encoding'][20000:])
-testing_count = count_vect.transform(training_data_df['comments'][:20000])
+print("-----TF*IDF in {} sec".format(finish_time - start_time))
+
+start_time = time.time()
+clf = tree.DecisionTreeClassifier()
+
+
+clf = clf.fit(train_tfidf,training_data_df['subreddit_encoding'][num_test_data:])
+finish_time = time.time()
+print("-----Fit in {} sec".format(finish_time - start_time))
+
+start_time = time.time()
+testing_count = count_vect.transform(training_data_df['comments'][:num_test_data])
 testing_tfidf = tfidf_transformer.transform(testing_count)
 predicted = clf.predict(testing_tfidf)
+finish_time = time.time()
+
+print("-----Predicted in {} sec".format(finish_time - start_time))
+
 
 #calculate accuracy
 #------------------------------------------------------------------------------
@@ -96,14 +102,8 @@ for result in predicted:
          #   print("------------")
          accuracy+=1
     index+=1
-
-
-
-
-
-
-
-
+print("-----Accuracy:", accuracy/num_test_data)
+    
 
 
 
