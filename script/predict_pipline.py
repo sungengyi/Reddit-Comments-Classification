@@ -43,14 +43,20 @@ def accuracy(predicted,true_outcome,num):
 
 def votepredict(tot_predicted):
     tot_predicted = np.transpose(tot_predicted)
-    vote_predicted = [mode(w) for w in tot_predicted]
+    vote_predicted = [mode(w).mode[0] for w in tot_predicted]
     return vote_predicted
-tot_predicted = []
+
+def transback(pred):
+    subreddits = pd.read_csv(r'../data/subreddits.csv')
+    word = [subreddits[i] for i in pred]
+    return word
+
     
 start_time = time.time()
 #load file
 #------------------------------------------------------------------------------
 training_data_df = pd.read_csv(r'../data/encoded_reddit_train.csv')
+test_data_df = pd.read_csv(r'../data/original_data/reddit_test.csv')
 finish_time = time.time()
 print("-----File Loaded in {} sec".format(finish_time - start_time))
 
@@ -71,8 +77,8 @@ finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 1. 3 multinomial naive bayes: predicting
 #------------------------------------------------------------------------------
-mnb_predicted = mnb_train_clf.predict(training_data_df['comments'][:num_test_data])
-tot_predicted = tot_predicted.append(mnb_predicted)
+mnb_predicted = mnb_train_clf.predict(test_data_df['comments'])
+tot_predicted=np.array([mnb_predicted])
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
@@ -122,8 +128,8 @@ finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 3. 3 logistic regression: predicting
 #------------------------------------------------------------------------------
-lr_predicted = lr_train_clf.predict(training_data_df['comments'][:num_test_data])
-tot_predicted = tot_predicted.append(lr_predicted)
+lr_predicted = lr_train_clf.predict(test_data_df['comments'])
+tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
 # 3. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(lr_predicted,training_data_df['subreddit_encoding'], num_test_data)
@@ -167,7 +173,8 @@ finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 5. 3 multinomial naive bayes: predicting
 #------------------------------------------------------------------------------
-mnb_predicted = mnb_train_clf.predict(training_data_df['comments'])
+mnb_predicted = mnb_train_clf.predict(test_data_df['comments'])
+tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
 # 5. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
@@ -185,12 +192,13 @@ svm_train_clf= Pipeline([
 svm_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
 # 6. 3 svm: predicting
 #------------------------------------------------------------------------------
-svm_predicted = svm_train_clf.predict(training_data_df['comments'])
-tot_predicted = tot_predicted.append(svm_predicted)
+svm_predicted = svm_train_clf.predict(test_data_df['comments'])
+tot_predicted.append(svm_predicted)
 # 6. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(svm_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
+vp = votepredict(tot_predicted)
 
 
 
