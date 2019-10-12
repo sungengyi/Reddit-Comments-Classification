@@ -18,6 +18,7 @@ from numpy import transpose as T
 from scipy.stats import stats
 from sklearn import tree
 from scipy.stats import mode
+from sklearn.model_selection import cross_validate
 
 
 from sklearn.feature_extraction.text import CountVectorizer
@@ -78,7 +79,7 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 # 1. 3 multinomial naive bayes: predicting
 #------------------------------------------------------------------------------
 mnb_predicted = mnb_train_clf.predict(test_data_df['comments'])
-tot_predicted=np.array([mnb_predicted])
+#tot_predicted=np.array([mnb_predicted])
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
@@ -116,10 +117,10 @@ accuracy(dct_predicted,training_data_df['subreddit_encoding'], num_test_data)
 # 3. 1 logistic regression
 #------------------------------------------------------------------------------
 lr_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
+        ('vect',CountVectorizer(binary = True)),
         ('tfidf',TfidfTransformer()),
         ('clf', LogisticRegression(random_state=0, solver='lbfgs',
-                        multi_class='multinomial', max_iter = 75)),])
+                        multi_class='multinomial', max_iter = 300)),])
 # 3. 2 logistic regression: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
@@ -128,8 +129,8 @@ finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 3. 3 logistic regression: predicting
 #------------------------------------------------------------------------------
-lr_predicted = lr_train_clf.predict(test_data_df['comments'])
-tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
+lr_predicted = lr_train_clf.predict(training_data_df['comments'][:num_test_data])
+#tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
 # 3. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(lr_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
@@ -169,7 +170,7 @@ accuracy(nb_predicted,training_data_df['subreddit_encoding'], num_test_data)
 # 5. 1 multinomial naive bayes
 #------------------------------------------------------------------------------
 mnb_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
+        ('vect',CountVectorizer(binary = True)),
         ('tfidf',TfidfTransformer()),
         ('clf', MultinomialNB()),
         ])
@@ -211,9 +212,24 @@ accuracy(svm_predicted,training_data_df['subreddit_encoding'], num_test_data)
 vp = votepredict(tot_predicted)
 
 
+# -----------------------------------------------------------------------------
+#VALIDATE
+#------------------------------------------------------------------------------
 
+lr_cv_results = cross_validate(lr_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
+sorted(lr_cv_results.keys())
+lr_cv_results['fit_time']
+lr_cv_results['test_score']
 
+mnb_cv_results = cross_validate(mnb_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
+sorted(mnb_cv_results.keys())
+mnb_cv_results['fit_time']
+mnb_cv_results['test_score']
 
+svm_cv_results = cross_validate(svm_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
+sorted(svm_cv_results.keys())
+svm_cv_results['fit_time']
+svm_cv_results['test_score']
 
 
 
