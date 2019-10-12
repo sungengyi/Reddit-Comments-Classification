@@ -61,7 +61,7 @@ mnb_train_clf = Pipeline([
 # 1. 2 multinomial naive bayes: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
-mnb_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+mnb_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
 finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 1. 3 multinomial naive bayes: predicting
@@ -84,7 +84,7 @@ dct_train_clf = Pipeline([
 # 2. 2 decision tree: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
-dct_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+dct_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
 finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 #
@@ -155,12 +155,12 @@ mnb_train_clf = Pipeline([
 # 5. 2 multinomial naive bayes: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
-mnb_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+mnb_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
 finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 5. 3 multinomial naive bayes: predicting
 #------------------------------------------------------------------------------
-mnb_predicted = mnb_train_clf.predict(training_data_df['comments'])
+mnb_predicted = mnb_train_clf.predict(training_data_df['comments'][:num_test_data])
 # 5. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
@@ -175,10 +175,13 @@ svm_train_clf= Pipeline([
         ])
 # 6. 2 svm: fitting
 #------------------------------------------------------------------------------
-svm_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+start_time = time.time()
+svm_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
 # 6. 3 svm: predicting
 #------------------------------------------------------------------------------
-svm_predicted = svm_train_clf.predict(training_data_df['comments'])
+svm_predicted = svm_train_clf.predict(training_data_df['comments'][:num_test_data])
 # 6. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(svm_predicted,training_data_df['subreddit_encoding'], num_test_data)
