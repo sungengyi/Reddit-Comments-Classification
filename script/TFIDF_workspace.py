@@ -82,22 +82,27 @@ def binarize(X):
 
 def test():
     diff = 0
-    nb_samples = 3000
-    for i in range(100):
-        bnbdata_X, bnbdata_Y = make_classification(n_samples=nb_samples, n_features=8, n_informative=4, n_redundant=0)
+    nb_samples = 1000
+    nb_rounds = 25
+    x = np.zeros((nb_rounds))
+    y = np.zeros((nb_rounds))
+    for i in range(nb_rounds):
+        bnbdata_X, bnbdata_Y = make_classification(n_samples=nb_samples, n_features=4, n_informative=4,n_classes=4, n_redundant=0)
+        
         binarize(bnbdata_X)
         bnb = MultinomialNB()
         y_pred2 = bnb.fit(bnbdata_X,bnbdata_Y).predict(bnbdata_X)
-        mnb = nb.NaiveBayes()
+        mnb = nb.NaiveBayes(num_class=20)
         mnb.fit(bnbdata_X,bnbdata_Y)
         y_pred3 = mnb.predict(bnbdata_X)
+        #print(y_pred3)
         print("mnb: ",(bnbdata_Y != y_pred3).sum(),"bnb: ",(bnbdata_Y != y_pred2).sum())
-        if ((bnbdata_Y != y_pred3).sum()!=(bnbdata_Y != y_pred2).sum()):
-            diff+=1
-    return diff
+        y[i] =(bnbdata_Y != y_pred2).sum()
+        x[i] =(bnbdata_Y != y_pred3).sum()
 
-print("test error rate out of 100 round: %d" %(test()))
+    return np.var(x),np.var(y),np.average(x),np.average(y)
 
+a,b,c,d = test()
 
 
 

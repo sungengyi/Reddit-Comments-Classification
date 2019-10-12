@@ -27,11 +27,13 @@ class NaiveBayes:
                     clas = self.Y_outcomes[i]
                     self.w[clas,j] += 1
                         
-        for j in range(self.m):
-            for i in range(self.num_class):
-                self.theta[i,j]=self.w[i,j]/self.N[i]
+
         if self.ls == True :
             self.laplace_smooth()
+        else:
+            for j in range(self.m):
+                for i in range(self.num_class):
+                    self.theta[i,j]=self.w[i,j]/self.N[i]
         if self.num_class == 2:
             for j in range(self.m):
                 self.ww[0,j] = math.log((1-self.theta[1,j])/(1-self.theta[0,j]))
@@ -65,10 +67,14 @@ class NaiveBayes:
             return decision
         
         else:
-            class_prob = np.zeros((self.num_class),dtype=int)
-            for i in range(self.num_class):
-                likeli = 0
-                for j in range(self.m):
-                    likeli += dataset[j]*np.log(self.theta[i,j])+(1-dataset[j])*np.log(1-theta[i,j])
-                class_prob[i]=likeli+np.log(self.N[i]/self.n)
-            return np.argmax(class_prob)
+            decision = np.zeros([dataset.shape[0]], dtype = int)
+            for k in range(dataset.shape[0]):
+                class_prob = np.zeros([self.num_class],dtype=int)
+                for i in range(self.num_class):
+                    likeli = 0
+                    for j in range(self.m):
+                        likeli += dataset[k,j]*np.log(self.theta[i,j])+(1-dataset[k,j])*np.log(1-self.theta[i,j])
+                    class_prob[i]=likeli+math.log((self.N[i]+1)/(self.n+2))
+ 
+                decision[k] = np.argmax(class_prob)
+        return decision
