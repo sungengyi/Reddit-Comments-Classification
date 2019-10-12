@@ -22,8 +22,9 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn import tree
 from sklearn.linear_model import LogisticRegression
+from NaiveBayes import NaiveBayes
 
-num_test_data = 10000
+num_test_data = 59000
 
 def accuracy(predicted,true_outcome,num):
     accuracy = 0
@@ -83,6 +84,24 @@ lr_predicted = lr_train_clf.predict(training_data_df['comments'][:num_test_data]
 # 3. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(lr_predicted,training_data_df['subreddit_encoding'], num_test_data)
+
+
+# 4. 1 logistic regression
+#------------------------------------------------------------------------------
+nb_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', NaiveBayes(20)),
+        ])
+# 3. 2 logistic regression: fitting
+#------------------------------------------------------------------------------
+nb_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+# 3. 3 logistic regression: predicting
+#------------------------------------------------------------------------------
+nb_predicted = nb_train_clf.predict(training_data_df['comments'][:num_test_data])
+# 3. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(nb_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
 
 
