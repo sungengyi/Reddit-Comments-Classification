@@ -46,6 +46,26 @@ print("-----File Loaded in {} sec".format(finish_time - start_time))
 
 
 
+# 1. 1 multinomial naive bayes
+#------------------------------------------------------------------------------
+mnb_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', MultinomialNB()),
+        ])
+# 1. 2 multinomial naive bayes: fitting
+#------------------------------------------------------------------------------
+mnb_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+# 1. 3 multinomial naive bayes: predicting
+#------------------------------------------------------------------------------
+mnb_predicted = mnb_train_clf.predict(training_data_df['comments'])
+# 1. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
+
+
+
+
 # 2. 1 decision tree
 #------------------------------------------------------------------------------
 dct_train_clf = Pipeline([
@@ -86,7 +106,9 @@ lr_predicted = lr_train_clf.predict(training_data_df['comments'][:num_test_data]
 accuracy(lr_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
 
-# 4. 1 logistic regression
+
+
+# 4. 1 
 #------------------------------------------------------------------------------
 nb_train_clf = Pipeline([
         ('vect',CountVectorizer()),
@@ -104,7 +126,22 @@ nb_predicted = nb_train_clf.predict(training_data_df['comments'][:num_test_data]
 accuracy(nb_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
 
-
+# 5. 1 multinomial naive bayes
+#------------------------------------------------------------------------------
+mnb_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', MultinomialNB()),
+        ])
+# 5. 2 multinomial naive bayes: fitting
+#------------------------------------------------------------------------------
+mnb_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+# 5. 3 multinomial naive bayes: predicting
+#------------------------------------------------------------------------------
+mnb_predicted = mnb_train_clf.predict(training_data_df['comments'])
+# 5. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
 
 
