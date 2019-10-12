@@ -17,8 +17,13 @@ from tqdm import tqdm
 from numpy import transpose as T
 from scipy.stats import stats
 from sklearn import tree
+
+
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
+
+#import models
+from sklearn.svm import LinearSVC
 from sklearn.naive_bayes import MultinomialNB
 from sklearn import tree
 from sklearn.linear_model import LogisticRegression
@@ -142,6 +147,24 @@ mnb_predicted = mnb_train_clf.predict(training_data_df['comments'])
 # 5. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
+
+
+# 6.1 SVM
+#------------------------------------------------------------------------------
+svm_train_clf= Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', LinearSVC(1.0)),
+        ])
+# 6. 2 svm: fitting
+#------------------------------------------------------------------------------
+svm_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+# 6. 3 svm: predicting
+#------------------------------------------------------------------------------
+svm_predicted = svm_train_clf.predict(training_data_df['comments'])
+# 6. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(svm_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
 
 
