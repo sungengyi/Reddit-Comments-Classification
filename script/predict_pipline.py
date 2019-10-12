@@ -206,6 +206,29 @@ tot_predicted.append(svm_predicted)
 #------------------------------------------------------------------------------
 accuracy(svm_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
+
+# 7. 1 k-nearest neighbors
+#------------------------------------------------------------------------------
+KN_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', KNeighborsClassifier(n_neighbors=5)),
+        ])
+# 7. 2 k-nearest neighbors: fitting
+#------------------------------------------------------------------------------
+start_time = time.time()
+KN_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
+# 7. 3 k-nearest neighbors: predicting
+#------------------------------------------------------------------------------
+KN_predicted = KN_train_clf.predict(training_data_df['comments'])
+tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
+# 7. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
+
+
 # Final step
 #------------------------------------------------------------------------------
 vp = votepredict(tot_predicted)
