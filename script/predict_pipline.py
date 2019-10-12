@@ -193,7 +193,7 @@ svm_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encod
 # 6. 3 svm: predicting
 #------------------------------------------------------------------------------
 svm_predicted = svm_train_clf.predict(test_data_df['comments'])
-tot_predicted.append(svm_predicted)
+
 # 6. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(svm_predicted,training_data_df['subreddit_encoding'], num_test_data)
@@ -201,6 +201,8 @@ accuracy(svm_predicted,training_data_df['subreddit_encoding'], num_test_data)
 # Final step
 #------------------------------------------------------------------------------
 vp = votepredict(tot_predicted)
+vp = transback(vp)
+df = pd.DataFrame({'Category': vp})
 
 
 

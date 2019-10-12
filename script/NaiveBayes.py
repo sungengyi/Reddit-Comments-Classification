@@ -15,28 +15,30 @@ class NaiveBayes:
         self.Y_outcomes = Y_quality
         self.n,self.m = self.X_features.shape
         self.N = np.zeros((self.num_class),dtype=int)
-        for i in range(self.Y_outcomes.shape[0]):
-            self.N[self.Y_outcomes[i]]+=1
+#        for i in range(self.Y_outcomes.shape[0]):
+#            self.N[self.Y_outcomes[i]]+=1
+        for i in range(self.num_class):
+            self.N[i] = len([w for w in self.Y_outcomes if w==i])
         
-        
-        self.w = np.zeros([self.num_class,self.m],dtype=int)
+        self.w = np.zeros([self.num_class,self.m],dtype=float)
         self.theta = np.ones_like(self.w,dtype = float)
         self.ww = np.ones_like(self.w,dtype = float)
         self.logp = np.ones_like(self.w,dtype = float)
         # make array w that stores all features p(xi|y=c)
-        for j in range (self.m):
-            for i in range(self.n):
-                if self.X_features[i,j] == 1:
-                    clas = self.Y_outcomes[i]
-                    self.w[clas,j] += 1
-                        
+
+        for i in range(self.n):
+            self.w[self.Y_outcomes[i]] += self.X_features[i]
+
+                
 
         if self.ls == True :
             self.laplace_smooth()
         else:
-            for j in range(self.m):
-                for i in range(self.num_class):
-                    self.theta[i,j]=self.w[i,j]/self.N[i]
+#            for j in range(self.m):
+#                for i in range(self.num_class):
+#                    self.theta[i,j]=self.w[i,j]/self.N[i]
+            for i in range(self.num_class):
+                self.theta[i] = self.w[i]/self.N[i]
         if self.num_class == 2:
             for j in range(self.m):
                 self.ww[0,j] = math.log((1-self.theta[1,j])/(1-self.theta[0,j]))
@@ -48,9 +50,8 @@ class NaiveBayes:
  
                
     def laplace_smooth(self):
-        for j in range(self.m):
             for i in range(self.num_class):
-                self.theta[i,j]=(self.w[i,j]+1)/(self.N[i]+2)
+                self.theta[i] = (self.w[i]+1)/(self.N[i]+2)
 
         
     def predict(self, dataset):

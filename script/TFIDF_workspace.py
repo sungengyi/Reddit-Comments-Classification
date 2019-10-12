@@ -1,22 +1,13 @@
-import nltk
-import csv
+
+import time
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import string
-from tqdm import tqdm
-from numpy import transpose as T
-from scipy.stats import stats
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk.tokenize import RegexpTokenizer
+
+
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer 
 from nltk.stem.snowball import SnowballStemmer
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
 import NaiveBayes as nb
-from sklearn.naive_bayes import BernoulliNB
+
 from sklearn.datasets import make_classification
 from sklearn.naive_bayes import MultinomialNB
 
@@ -82,24 +73,29 @@ def binarize(X):
 
 def test():
 
-    nb_samples = 200
-    nb_rounds = 25
+    nb_samples = 20000
+    nb_rounds = 1
     x = np.zeros((nb_rounds))
     y = np.zeros((nb_rounds))
+    start_time = time.time()
     for i in range(nb_rounds):
-        bnbdata_X, bnbdata_Y = make_classification(n_samples=nb_samples, n_features=20, n_informative=20,n_classes=5, n_redundant=0)
+        bnbdata_X, bnbdata_Y = make_classification(n_samples=nb_samples, n_features=1000, n_informative=1000,n_classes=2, n_redundant=0)
         
         binarize(bnbdata_X)
         bnb = MultinomialNB()
         y_pred2 = bnb.fit(bnbdata_X,bnbdata_Y).predict(bnbdata_X)
-        mnb = nb.NaiveBayes(num_class=20)
+        '''
+        mnb = nb.NaiveBayes(num_class=2)
         mnb.fit(bnbdata_X,bnbdata_Y)
         y_pred3 = mnb.predict(bnbdata_X)
+        
         #print(y_pred3)
         print("mnb: ",(bnbdata_Y != y_pred3).sum(),"bnb: ",(bnbdata_Y != y_pred2).sum())
         y[i] =(bnbdata_Y != y_pred2).sum()
         x[i] =(bnbdata_Y != y_pred3).sum()
-
+        '''
+    finish_time = time.time()
+    print("-----Processed in {} sec".format(finish_time - start_time))
     return np.var(x),np.var(y),np.average(x),np.average(y)
 
 a,b,c,d = test()
