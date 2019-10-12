@@ -48,7 +48,7 @@ def votepredict(tot_predicted):
 
 def transback(pred):
     subreddits = pd.read_csv(r'../data/subreddits.csv')
-    word = [subreddits[i] for i in pred]
+    word = [subreddits['0'][i] for i in pred]
     return word
 
     
@@ -198,6 +198,8 @@ tot_predicted.append(svm_predicted)
 #------------------------------------------------------------------------------
 accuracy(svm_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
+# Final step
+#------------------------------------------------------------------------------
 vp = votepredict(tot_predicted)
 
 
