@@ -45,7 +45,7 @@ def encode_subreddit(argument):
             "trees":8,
             "GlobalOffensive":9,
             "nfl":10,
-            "Askreddit":11,
+            "AskReddit":11,
             "gameofthrones":12,
             "conspiracy":13,
             "worldnews":14,

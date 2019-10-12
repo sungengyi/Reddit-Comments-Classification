@@ -24,7 +24,7 @@ from sklearn import tree
 from sklearn.linear_model import LogisticRegression
 from NaiveBayes import NaiveBayes
 
-num_test_data = 59000
+num_test_data = 9000
 
 def accuracy(predicted,true_outcome,num):
     accuracy = 0
@@ -40,7 +40,7 @@ def accuracy(predicted,true_outcome,num):
 start_time = time.time()
 #load file
 #------------------------------------------------------------------------------
-training_data_df = pd.read_csv('../data/encoded_reddit_train.csv')
+training_data_df = pd.read_csv(r'../data/encoded_reddit_train.csv')
 finish_time = time.time()
 print("-----File Loaded in {} sec".format(finish_time - start_time))
 
@@ -55,10 +55,13 @@ mnb_train_clf = Pipeline([
         ])
 # 1. 2 multinomial naive bayes: fitting
 #------------------------------------------------------------------------------
+start_time = time.time()
 mnb_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
 # 1. 3 multinomial naive bayes: predicting
 #------------------------------------------------------------------------------
-mnb_predicted = mnb_train_clf.predict(training_data_df['comments'])
+mnb_predicted = mnb_train_clf.predict(training_data_df['comments'][:num_test_data])
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
@@ -71,14 +74,19 @@ accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
 dct_train_clf = Pipeline([
         ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
-        ('clf', tree.DecisionTreeClassifier()),
+        ('clf', tree.DecisionTreeRegressor()),
         ])
 # 2. 2 decision tree: fitting
 #------------------------------------------------------------------------------
+start_time = time.time()
 dct_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
+#
+
 # 2. 3 decision tree: predicting
 #------------------------------------------------------------------------------
-dct_predicted = dct_train_clf.predict(training_data_df['comments'])
+dct_predicted = dct_train_clf.predict(training_data_df['comments'][:num_test_data])
 # 2. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(dct_predicted,training_data_df['subreddit_encoding'], num_test_data)
@@ -97,7 +105,10 @@ lr_train_clf = Pipeline([
         ])
 # 3. 2 logistic regression: fitting
 #------------------------------------------------------------------------------
+start_time = time.time()
 lr_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
 # 3. 3 logistic regression: predicting
 #------------------------------------------------------------------------------
 lr_predicted = lr_train_clf.predict(training_data_df['comments'][:num_test_data])
@@ -117,8 +128,11 @@ nb_train_clf = Pipeline([
         ])
 # 3. 2 logistic regression: fitting
 #------------------------------------------------------------------------------
+start_time = time.time()
 nb_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
-# 3. 3 logistic regression: predicting
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))# 3. 3
+#logistic regression: predicting
 #------------------------------------------------------------------------------
 nb_predicted = nb_train_clf.predict(training_data_df['comments'][:num_test_data])
 # 3. 4 calculate accuracy
@@ -135,7 +149,10 @@ mnb_train_clf = Pipeline([
         ])
 # 5. 2 multinomial naive bayes: fitting
 #------------------------------------------------------------------------------
+start_time = time.time()
 mnb_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
 # 5. 3 multinomial naive bayes: predicting
 #------------------------------------------------------------------------------
 mnb_predicted = mnb_train_clf.predict(training_data_df['comments'])
