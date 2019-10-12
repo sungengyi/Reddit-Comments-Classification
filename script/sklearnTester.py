@@ -23,7 +23,6 @@ from sklearn import tree
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
-from NaiveBayes import NB
 
 #---------------------------------------------------------------------------
 #X = [[0,0],[1,1]]
@@ -56,6 +55,9 @@ def encode_subreddit(argument):
             "baseball":19,             
             }
     return switch.get(argument,20)
+
+
+
 #------------------------------------------------------------------------------
 #encode subreddit
 
@@ -66,10 +68,19 @@ for subreddit in training_data_df['subreddits']:
 training_data_df['subreddit_encoding'] = encode
 training_data_df.to_csv(r'../data/encoded_reddit_train.csv',',')
 
+
+
+stop_words = set(stopwords.words('english')) 
+stemmer = SnowballStemmer("english")
+
+training_data_df['delete_symbol_token'] = training_data_df['comments'].str.replace('[{}]'.format(string.punctuation), '')
+training_data_df['delete_stopword_token']= training_data_df['delete_symbol_token'].str.lower().apply(lambda x: [item for item in str(x).split() if item not in stop_words])
+training_data_df['text_lemmatized'] = training_data_df.delete_stopword_token.apply(lambda x : [lemmatizer.lemmatize(w) for w in x])
+
 #tokenize
 #------------------------------------------------------------------------------   
-count_vect = CountVectorizer()
-train_counts = count_vect.fit_transform(training_data_df['comments'][20000:])
+count_vect = CountVectorizer(lowercase = False)
+train_counts = count_vect.fit_transform(training_data_df['text_lemmatized'][20000:])
 print(train_counts.shape)
 
 #tf idf
@@ -81,7 +92,7 @@ print(train_tfidf.shape)
 #train model
 #------------------------------------------------------------------------------
 clf = MultinomialNB().fit(train_tfidf,training_data_df['subreddit_encoding'][20000:])
-testing_count = count_vect.transform(training_data_df['comments'][:20000])
+testing_count = count_vect.transform(training_data_df['text_lemmatized'][:20000])
 testing_tfidf = tfidf_transformer.transform(testing_count)
 predicted = clf.predict(testing_tfidf)
 

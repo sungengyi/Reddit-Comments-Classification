@@ -29,7 +29,7 @@ from sklearn import tree
 from sklearn.linear_model import LogisticRegression
 from NaiveBayes import NaiveBayes
 
-num_test_data = 9000
+num_test_data = 30000
 
 def accuracy(predicted,true_outcome,num):
     accuracy = 0
@@ -54,7 +54,7 @@ print("-----File Loaded in {} sec".format(finish_time - start_time))
 # 1. 1 multinomial naive bayes
 #------------------------------------------------------------------------------
 mnb_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
+        ('vect',CountVectorizer(binary = True)),
         ('tfidf',TfidfTransformer()),
         ('clf', MultinomialNB()),
         ])
@@ -70,8 +70,9 @@ mnb_predicted = mnb_train_clf.predict(training_data_df['comments'][:num_test_dat
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
-
-
+'''
+ 53.57 with binary = True, 53.85 with False, num_test_data = 30000
+'''
 
 
 # 2. 1 decision tree
@@ -106,8 +107,7 @@ lr_train_clf = Pipeline([
         ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
         ('clf', LogisticRegression(random_state=0, solver='lbfgs',
-                        multi_class='multinomial')),
-        ])
+                        multi_class='multinomial', max_iter = 75)),])
 # 3. 2 logistic regression: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
@@ -119,8 +119,16 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 lr_predicted = lr_train_clf.predict(training_data_df['comments'][:num_test_data])
 # 3. 4 calculate accuracy
 #------------------------------------------------------------------------------
-accuracy(lr_predicted,training_data_df['subreddit_encoding'], num_test_data)
+accuracy(lr_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 
+'''
+1. num = 30000 binary = True
+-----Execute in 31.341885328292847 sec
+-----Accuracy: 0.5263666666666666
+2.  num = 30000, binary = false
+-----Execute in 33.12492775917053 sec
+-----Accuracy: 0.5242333333333333
+'''
 
 
 
