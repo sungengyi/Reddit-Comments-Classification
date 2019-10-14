@@ -37,7 +37,7 @@ file_dfidf['delete_stopword_token']= file_dfidf['delete_symbol_token'].str.lower
 file_dfidf['text_lemmatized'] = file_dfidf.delete_stopword_token.apply(lambda x : [lemmatizer.lemmatize(w) for w in x])
 file_dfidf['text_stemmized'] = file_dfidf['text_lemmatized'].apply(lambda x : [stemmer.stem(w) for w in x])
 '''
-'''
+
 corpus = file_dfidf['comments']
 vectorizer1 = TfidfVectorizer(stop_words=stop_words)
 X1 = vectorizer1.fit_transform(corpus)
@@ -45,24 +45,25 @@ wnl = WordNetLemmatizer()
 snss = SnowballStemmer("english", ignore_stopwords=True)
 my_stop_words = [snss.stem(wnl.lemmatize(t)) for t in stopwords.words('english')]
 
-'''
+
     
     
 
 
-'''
+
 class LemmaTokenizer(object):
     def __init__(self):
         self.wnl = WordNetLemmatizer()
         self.sns = SnowballStemmer("english", ignore_stopwords=True)
     def __call__(self, articles):
-        articles.split();
-        
+        ws = articles.split();
+        ws = [self.wnl.lemmatize(w) for w in ws if w not in stopwords.words('english')]
+        return ws
 
 
 vectorizer2 = TfidfVectorizer(tokenizer = LemmaTokenizer(),stop_words=my_stop_words)
 X2 = vectorizer2.fit_transform(corpus)
-'''
+
 def binarize(X):
     for i in range(X.shape[0]):
         for j in range(X.shape[1]):
