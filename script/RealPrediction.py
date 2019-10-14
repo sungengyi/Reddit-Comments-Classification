@@ -29,6 +29,7 @@ from sklearn.svm import LinearSVC
 from sklearn.naive_bayes import MultinomialNB
 from sklearn import tree
 from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
 from NaiveBayes import NaiveBayes
 
 num_test_data = 30000
@@ -66,7 +67,13 @@ print("-----File Loaded in {} sec".format(finish_time - start_time))
 # 1. 1 multinomial naive bayes
 #------------------------------------------------------------------------------
 mnb_train_clf = Pipeline([
-        ('vect',CountVectorizer(binary = True)),
+        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
+                       strip_accents = 'unicode',
+                       stop_words = 'english',
+                       lowercase = True,
+                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
+                       max_df = 0.8,
+                       binary = True)),
         ('tfidf',TfidfTransformer()),
         ('clf', MultinomialNB()),
         ])
@@ -79,45 +86,26 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 # 1. 3 multinomial naive bayes: predicting
 #------------------------------------------------------------------------------
 mnb_predicted = mnb_train_clf.predict(test_data_df['comments'])
-#tot_predicted=np.array([mnb_predicted])
+tot_predicted=np.array([mnb_predicted])
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
-accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
+
 '''
  53.57 with binary = True, 53.85 with False, num_test_data = 30000
 '''
 
 
-# 2. 1 decision tree
-#------------------------------------------------------------------------------
-dct_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
-        ('tfidf',TfidfTransformer()),
-        ('clf', tree.DecisionTreeRegressor()),
-        ])
-# 2. 2 decision tree: fitting
-#------------------------------------------------------------------------------
-start_time = time.time()
-dct_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
-finish_time = time.time()
-print("-----Execute in {} sec".format(finish_time - start_time))
-#
-
-# 2. 3 decision tree: predicting
-#------------------------------------------------------------------------------
-dct_predicted = dct_train_clf.predict(training_data_df['comments'][:num_test_data])
-# 2. 4 calculate accuracy
-#------------------------------------------------------------------------------
-accuracy(dct_predicted,training_data_df['subreddit_encoding'], num_test_data)
-
-
-
-
-
 # 3. 1 logistic regression
 #------------------------------------------------------------------------------
 lr_train_clf = Pipeline([
-        ('vect',CountVectorizer(binary = True)),
+        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
+                       strip_accents = 'unicode',
+                       stop_words = 'english',
+                       lowercase = True,
+                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
+                       max_df = 0.5,
+                       min_df = 1,
+                       binary = True)),
         ('tfidf',TfidfTransformer()),
         ('clf', LogisticRegression(random_state=0, solver='lbfgs',
                         multi_class='multinomial', max_iter = 300)),])
@@ -129,11 +117,11 @@ finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 3. 3 logistic regression: predicting
 #------------------------------------------------------------------------------
-lr_predicted = lr_train_clf.predict(training_data_df['comments'][:num_test_data])
-#tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
+lr_predicted = lr_train_clf.predict(test_data_df['comments'])
+tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
 # 3. 4 calculate accuracy
 #------------------------------------------------------------------------------
-accuracy(lr_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+
 
 '''
 1. num = 30000 binary = True
@@ -144,27 +132,6 @@ accuracy(lr_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 -----Accuracy: 0.5242333333333333
 '''
 
-
-
-# 4. 1 
-#------------------------------------------------------------------------------
-nb_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
-        ('tfidf',TfidfTransformer()),
-        ('clf', NaiveBayes(20)),
-        ])
-# 3. 2 logistic regression: fitting
-#------------------------------------------------------------------------------
-start_time = time.time()
-nb_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
-finish_time = time.time()
-print("-----Execute in {} sec".format(finish_time - start_time))# 3. 3
-#logistic regression: predicting
-#------------------------------------------------------------------------------
-nb_predicted = nb_train_clf.predict(training_data_df['comments'][:num_test_data])
-# 3. 4 calculate accuracy
-#------------------------------------------------------------------------------
-accuracy(nb_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
 
 # 5. 1 multinomial naive bayes
@@ -186,7 +153,7 @@ mnb_predicted = mnb_train_clf.predict(test_data_df['comments'])
 tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
 # 5. 4 calculate accuracy
 #------------------------------------------------------------------------------
-accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
+
 
 
 # 6.1 SVM
@@ -202,10 +169,10 @@ svm_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encod
 # 6. 3 svm: predicting
 #------------------------------------------------------------------------------
 svm_predicted = svm_train_clf.predict(test_data_df['comments'])
-
+tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 # 6. 4 calculate accuracy
 #------------------------------------------------------------------------------
-accuracy(svm_predicted,training_data_df['subreddit_encoding'], num_test_data)
+
 
 
 # 7. 1 k-nearest neighbors
@@ -227,7 +194,7 @@ KN_predicted = KN_train_clf.predict(training_data_df['comments'])
 tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
 # 7. 4 calculate accuracy
 #------------------------------------------------------------------------------
-accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
+
 
 
 # Final step
@@ -235,26 +202,8 @@ accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
 vp = votepredict(tot_predicted)
 vp = transback(vp)
 df = pd.DataFrame({'Category': vp})
+df.to_csv(r'solution.csv')
 
-
-# -----------------------------------------------------------------------------
-#VALIDATE
-#------------------------------------------------------------------------------
-
-lr_cv_results = cross_validate(lr_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
-sorted(lr_cv_results.keys())
-lr_cv_results['fit_time']
-lr_cv_results['test_score']
-
-mnb_cv_results = cross_validate(mnb_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
-sorted(mnb_cv_results.keys())
-mnb_cv_results['fit_time']
-mnb_cv_results['test_score']
-
-svm_cv_results = cross_validate(svm_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
-sorted(svm_cv_results.keys())
-svm_cv_results['fit_time']
-svm_cv_results['test_score']
 
 
 
