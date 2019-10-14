@@ -255,7 +255,7 @@ accuracy(nb_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 svm_train_clf= Pipeline([
         ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
-        ('clf', LinearSVC(1.0)),
+        ('clf', LinearSVC(C = 0.2)),
         ])
 # 6. 2 svm: fitting
 #------------------------------------------------------------------------------
