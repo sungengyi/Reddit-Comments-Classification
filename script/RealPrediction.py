@@ -20,10 +20,6 @@ from sklearn import tree
 from scipy.stats import mode
 from sklearn.model_selection import cross_validate
 
-from nltk.stem import WordNetLemmatizer 
-from nltk import word_tokenize          
-
-
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -34,10 +30,8 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn import tree
 from sklearn.linear_model import LogisticRegression
 from NaiveBayes import NaiveBayes
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn import linear_model
 
-num_test_data = 10000
+num_test_data = 30000
 
 def accuracy(predicted,true_outcome,num):
     accuracy = 0
@@ -58,14 +52,7 @@ def transback(pred):
     word = [subreddits['0'][i] for i in pred]
     return word
 
-class LemmaTokenizer(object):
-    def __init__(self):
-        self.wnl = WordNetLemmatizer()
-    def __call__(self, articles):
-        return [self.wnl.lemmatize(t) for t in word_tokenize(articles)]
-
-
- 
+    
 start_time = time.time()
 #load file
 #------------------------------------------------------------------------------
@@ -79,72 +66,25 @@ print("-----File Loaded in {} sec".format(finish_time - start_time))
 # 1. 1 multinomial naive bayes
 #------------------------------------------------------------------------------
 mnb_train_clf = Pipeline([
-        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
-                       strip_accents = 'unicode',
-                       stop_words = 'english',
-                       lowercase = True,
-                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
-                       max_df = 0.8,
-                       binary = True)),
+        ('vect',CountVectorizer(binary = True)),
         ('tfidf',TfidfTransformer()),
         ('clf', MultinomialNB()),
         ])
 # 1. 2 multinomial naive bayes: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
-mnb_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+mnb_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
 finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 1. 3 multinomial naive bayes: predicting
 #------------------------------------------------------------------------------
-mnb_predicted = mnb_train_clf.predict(training_data_df['comments'][:num_test_data])
+mnb_predicted = mnb_train_clf.predict(test_data_df['comments'])
 #tot_predicted=np.array([mnb_predicted])
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
-accuracy(mnb_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
 '''
  53.57 with binary = True, 53.85 with False, num_test_data = 30000
-1. -----Accuracy: 0.5557 / 10000
-2. -----Accuracy: 0.5405666666666666 / 30000
-tokenizer=LemmaTokenizer(),
-                       strip_accents = 'unicode',
-                       stop_words = 'english',
-                       lowercase = True,
-                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
-                       max_df = 0.5,
-                       binary = True)
-3. 
------Execute in 28.745830535888672 sec
------Accuracy: 0.5407333333333333
-tokenizer=LemmaTokenizer(),
-                       strip_accents = 'unicode',
-                       stop_words = 'english',
-                       lowercase = True,
-                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
-                       max_df = 0.75,
-                       binary = True
-4. 
------Execute in 29.226696014404297 sec
------Accuracy: 0.5409333333333334
-tokenizer=LemmaTokenizer(),
-                       strip_accents = 'unicode',
-                       stop_words = 'english',
-                       lowercase = True,
-                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
-#                       max_df = 0.75,
-                       binary = True
-5. 
------Execute in 43.64182090759277 sec
------Accuracy: 0.5558
-tokenizer=LemmaTokenizer(),
-                       strip_accents = 'unicode',
-                       stop_words = 'english',
-                       lowercase = True,
-                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
-                       max_df = 0.75,
-                       binary = True
-
-
 '''
 
 
@@ -177,14 +117,7 @@ accuracy(dct_predicted,training_data_df['subreddit_encoding'], num_test_data)
 # 3. 1 logistic regression
 #------------------------------------------------------------------------------
 lr_train_clf = Pipeline([
-        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
-                       strip_accents = 'unicode',
-                       stop_words = 'english',
-                       lowercase = True,
-                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
-                       max_df = 0.5,
-                       min_df = 1,
-                       binary = True)),
+        ('vect',CountVectorizer(binary = True)),
         ('tfidf',TfidfTransformer()),
         ('clf', LogisticRegression(random_state=0, solver='lbfgs',
                         multi_class='multinomial', max_iter = 300)),])
@@ -209,17 +142,6 @@ accuracy(lr_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 2.  num = 30000, binary = false
 -----Execute in 33.12492775917053 sec
 -----Accuracy: 0.5242333333333333
-3.num = 30000 binary = True
-tokenizer=LemmaTokenizer(),
-                       strip_accents = 'unicode',
-                       stop_words = 'english',
-                       lowercase = True,
-                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
-                       max_df = 0.5,
-                       min_df = 1,
-                       binary = True
------Execute in 77.83643221855164 sec
------Accuracy: 0.5247333333333334
 '''
 
 
@@ -291,9 +213,8 @@ accuracy(svm_predicted,training_data_df['subreddit_encoding'], num_test_data)
 KN_train_clf = Pipeline([
         ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
-        ('clf', KNeighborsClassifier(n_neighbors= 3)),
+        ('clf', KNeighborsClassifier(n_neighbors=5)),
         ])
-    
 # 7. 2 k-nearest neighbors: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
@@ -303,35 +224,11 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 # 7. 3 k-nearest neighbors: predicting
 #------------------------------------------------------------------------------
 KN_predicted = KN_train_clf.predict(training_data_df['comments'])
-#tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
+tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
 # 7. 4 calculate accuracy
 #------------------------------------------------------------------------------
-accuracy(KN_predicted,training_data_df['subreddit_encoding'], num_test_data)
-#when neighbors = 5 accuracy = 0.5686
-#when neighbors = 10 accuracy = 0.4545333
+accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
-
-
-# 8 1  SGDClassifier
-#------------------------------------------------------------------------------
-SGD_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
-        ('tfidf',TfidfTransformer()),
-        ('clf', linear_model.SGDClassifier()),
-        ])
-# 8. 2   SGDClassifier: fitting
-#------------------------------------------------------------------------------
-start_time = time.time()
-SGD_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
-finish_time = time.time()
-print("-----Execute in {} sec".format(finish_time - start_time))
-# 8. 3 SGDClassifier: predicting
-#------------------------------------------------------------------------------
-SGD_predicted = SGD_train_clf.predict(training_data_df['comments'])
-#tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
-# 8. 4 calculate accuracy
-#------------------------------------------------------------------------------
-accuracy(SGD_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
 # Final step
 #------------------------------------------------------------------------------

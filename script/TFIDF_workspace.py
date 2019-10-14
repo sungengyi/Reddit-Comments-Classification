@@ -1,6 +1,8 @@
 
 import time
 import numpy as np
+import nltk
+import string
 
 
 from nltk.corpus import stopwords
