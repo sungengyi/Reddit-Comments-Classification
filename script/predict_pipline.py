@@ -30,8 +30,10 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn import tree
 from sklearn.linear_model import LogisticRegression
 from NaiveBayes import NaiveBayes
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.decomposition import TruncatedSVD
 
-num_test_data = 30000
+num_test_data = 10000
 
 def accuracy(predicted,true_outcome,num):
     accuracy = 0
@@ -224,11 +226,32 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 # 7. 3 k-nearest neighbors: predicting
 #------------------------------------------------------------------------------
 KN_predicted = KN_train_clf.predict(training_data_df['comments'])
-tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
+#tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
 # 7. 4 calculate accuracy
 #------------------------------------------------------------------------------
-accuracy(mnb_predicted,training_data_df['subreddit_encoding'], num_test_data)
+accuracy(KN_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
+
+# 8 1  Truncated SVD
+#------------------------------------------------------------------------------
+SVD_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', TruncatedSVD()),
+        ])
+# 8. 2   Truncated SVD: fitting
+#------------------------------------------------------------------------------
+start_time = time.time()
+SVD_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
+# 8. 3 Truncated SVD: predicting
+#------------------------------------------------------------------------------
+SVD_predicted = SVD_train_clf.predict(training_data_df['comments'])
+#tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
+# 8. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(SVD_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
 # Final step
 #------------------------------------------------------------------------------
