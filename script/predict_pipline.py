@@ -37,7 +37,7 @@ from NaiveBayes import NaiveBayes
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import linear_model
 
-num_test_data = 30000 
+num_test_data = 10000 
 def accuracy(predicted,true_outcome,num):
     accuracy = 0
     index = 0
@@ -108,6 +108,7 @@ tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
 
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
+print("MNB")
 accuracy(mnb_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 '''
  53.57 with binary = True, 53.85 with False, num_test_data = 30000
@@ -207,6 +208,8 @@ lr_predicted = lr_train_clf.predict(training_data_df['comments'][:num_test_data]
 tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
 # 3. 4 calculate accuracy
 #------------------------------------------------------------------------------
+print("LR")
+
 accuracy(lr_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 
 '''
@@ -261,7 +264,10 @@ svm_train_clf= Pipeline([
         ])
 # 6. 2 svm: fitting
 #------------------------------------------------------------------------------
+start_time = time.time()
 svm_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
 # 6. 3 svm: predicting
 #------------------------------------------------------------------------------
 svm_predicted = svm_train_clf.predict(training_data_df['comments'][:num_test_data])
@@ -271,6 +277,8 @@ tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 
 # 6. 4 calculate accuracy
 #------------------------------------------------------------------------------
+print("SVM")
+
 accuracy(svm_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 '''
 1. -----Accuracy: 0.5327666666666667: num 30000
@@ -321,6 +329,8 @@ KN_predicted = KN_train_clf.predict(training_data_df['comments'][:num_test_data]
 tot_predicted=np.append(tot_predicted,[KN_predicted],axis=0)
 # 7. 4 calculate accuracy
 #------------------------------------------------------------------------------
+print("KN")
+
 accuracy(KN_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 '''
 3. num 10000
@@ -359,6 +369,8 @@ tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
 
 # 8. 4 calculate accuracy
 #------------------------------------------------------------------------------
+print("SGD")
+
 accuracy(SGD_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 '''
 -----Accuracy: 0.5472666666666667
@@ -413,6 +425,8 @@ accuracy(SGD_predicted,training_data_df['subreddit_encoding'][:num_test_data], n
 #
 
 vp = votepredict(tot_predicted)
+print("Vote")
+
 accuracy(vp,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 
 
