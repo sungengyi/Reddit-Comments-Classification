@@ -31,7 +31,7 @@ from sklearn import tree
 from sklearn.linear_model import LogisticRegression
 from NaiveBayes import NaiveBayes
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.decomposition import TruncatedSVD
+from sklearn import linear_model
 
 num_test_data = 10000
 
@@ -215,8 +215,9 @@ accuracy(svm_predicted,training_data_df['subreddit_encoding'], num_test_data)
 KN_train_clf = Pipeline([
         ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
-        ('clf', KNeighborsClassifier(n_neighbors=5)),
+        ('clf', KNeighborsClassifier(n_neighbors= 3)),
         ])
+    
 # 7. 2 k-nearest neighbors: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
@@ -230,28 +231,31 @@ KN_predicted = KN_train_clf.predict(training_data_df['comments'])
 # 7. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(KN_predicted,training_data_df['subreddit_encoding'], num_test_data)
+#when neighbors = 5 accuracy = 0.5686
+#when neighbors = 10 accuracy = 0.4545333
 
 
-# 8 1  Truncated SVD
+
+# 8 1  SGDClassifier
 #------------------------------------------------------------------------------
-SVD_train_clf = Pipeline([
+SGD_train_clf = Pipeline([
         ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
-        ('clf', TruncatedSVD()),
+        ('clf', linear_model.SGDClassifier()),
         ])
-# 8. 2   Truncated SVD: fitting
+# 8. 2   SGDClassifier: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
-SVD_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+SGD_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
 finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
-# 8. 3 Truncated SVD: predicting
+# 8. 3 SGDClassifier: predicting
 #------------------------------------------------------------------------------
-SVD_predicted = SVD_train_clf.predict(training_data_df['comments'])
+SGD_predicted = SGD_train_clf.predict(training_data_df['comments'])
 #tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
 # 8. 4 calculate accuracy
 #------------------------------------------------------------------------------
-accuracy(SVD_predicted,training_data_df['subreddit_encoding'], num_test_data)
+accuracy(SGD_predicted,training_data_df['subreddit_encoding'], num_test_data)
 
 # Final step
 #------------------------------------------------------------------------------
