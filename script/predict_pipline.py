@@ -37,8 +37,7 @@ from NaiveBayes import NaiveBayes
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import linear_model
 
-num_test_data = 10000
-
+num_test_data = 10000 
 def accuracy(predicted,true_outcome,num):
     accuracy = 0
     index = 0
@@ -104,7 +103,7 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 # 1. 3 multinomial naive bayes: predicting
 #------------------------------------------------------------------------------
 mnb_predicted = mnb_train_clf.predict(training_data_df['comments'][:num_test_data])
-#tot_predicted=np.array([mnb_predicted])
+tot_predicted=np.array([mnb_predicted])
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(mnb_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
@@ -203,7 +202,7 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 # 3. 3 logistic regression: predicting
 #------------------------------------------------------------------------------
 lr_predicted = lr_train_clf.predict(training_data_df['comments'][:num_test_data])
-#tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
+tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
 # 3. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(lr_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
@@ -264,6 +263,7 @@ svm_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df[
 # 6. 3 svm: predicting
 #------------------------------------------------------------------------------
 svm_predicted = svm_train_clf.predict(test_data_df['comments'][:num_test_data])
+tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 
 # 6. 4 calculate accuracy
 #------------------------------------------------------------------------------
@@ -273,7 +273,13 @@ accuracy(svm_predicted,training_data_df['subreddit_encoding'][:num_test_data], n
 # 7. 1 k-nearest neighbors
 #------------------------------------------------------------------------------
 KN_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
+        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
+                       strip_accents = 'unicode',
+                       stop_words = 'english',
+                       lowercase = True,
+                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
+                       max_df = 0.4,
+                       binary = True)),
         ('tfidf',TfidfTransformer()),
         ('clf', KNeighborsClassifier(n_neighbors= 250)),
         ])
@@ -287,12 +293,25 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 # 7. 3 k-nearest neighbors: predicting
 #------------------------------------------------------------------------------
 KN_predicted = KN_train_clf.predict(training_data_df['comments'][:num_test_data])
+tot_predicted=np.append(tot_predicted,[KN_predicted],axis=0)
 # 7. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(KN_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
-#when neighbors = 5 accuracy = 0.5686
-#when neighbors = 10 accuracy = 0.4545333
-
+'''
+3. num 10000
+-----Execute in 2.9817392826080322 sec
+-----Accuracy: 0.4616
+4. num 10000
+ -----Accuracy: 0.505
+tokenizer=LemmaTokenizer(),
+                       strip_accents = 'unicode',
+                       stop_words = 'english',
+                       lowercase = True,
+                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
+                       max_df = 0.5,
+                       min_df = 1,
+                       binary = True
+'''
 
 
 # 8 1  SGDClassifier
@@ -350,6 +369,9 @@ kn_cv_results['fit_time']
 kn_cv_results['test_score']
 averageAcc(kn_cv_results['test_score'],7)
 
+
+vp = votepredict(tot_predicted)
+accuracy(vp,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 
 
 
