@@ -10,27 +10,23 @@ import time
 import csv
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import string
 from tqdm import tqdm
 from numpy import transpose as T
-from scipy.stats import stats
 from sklearn import tree
 from scipy.stats import mode
-from sklearn.model_selection import cross_validate
 
 
+from nltk.stem import WordNetLemmatizer 
+from nltk import word_tokenize
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
 #import models
 from sklearn.svm import LinearSVC
 from sklearn.naive_bayes import MultinomialNB
-from sklearn import tree
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
-from NaiveBayes import NaiveBayes
 
 num_test_data = 30000
 
@@ -52,7 +48,11 @@ def transback(pred):
     subreddits = pd.read_csv(r'../data/subreddits.csv')
     word = [subreddits['0'][i] for i in pred]
     return word
-
+class LemmaTokenizer(object):
+    def __init__(self):
+        self.wnl = WordNetLemmatizer()
+    def __call__(self, articles):
+        return [self.wnl.lemmatize(t) for t in word_tokenize(articles)]
     
 start_time = time.time()
 #load file
