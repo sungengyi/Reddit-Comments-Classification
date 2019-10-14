@@ -89,9 +89,10 @@ count_vect = CountVectorizer(tokenizer=LemmaTokenizer(),
                        lowercase = True,
                        token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
                        max_df = 0.5,
+                       min_df = 1,
                        binary = True)
-train_counts = count_vect.fit_transform(training_data_df['text_lemmatized'][20000:])
-print(train_counts.shape)
+train_counts = count_vect.fit_transform(training_data_df['comments'][20000:])
+print(count_vect.get_feature_names())
 
 #tf idf
 #------------------------------------------------------------------------------
