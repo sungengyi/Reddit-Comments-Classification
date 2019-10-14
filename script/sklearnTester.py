@@ -56,7 +56,11 @@ def encode_subreddit(argument):
             }
     return switch.get(argument,20)
 
-
+class LemmaTokenizer(object):
+    def __init__(self):
+        self.wnl = WordNetLemmatizer()
+    def __call__(self, articles):
+        return [self.wnl.lemmatize(t) for t in word_tokenize(articles)]
 
 #------------------------------------------------------------------------------
 #encode subreddit
@@ -79,7 +83,13 @@ training_data_df['text_lemmatized'] = training_data_df.delete_stopword_token.app
 
 #tokenize
 #------------------------------------------------------------------------------   
-count_vect = CountVectorizer(lowercase = False)
+count_vect = CountVectorizer(tokenizer=LemmaTokenizer(),
+                       strip_accents = 'unicode',
+                       stop_words = 'english',
+                       lowercase = True,
+                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
+                       max_df = 0.5,
+                       binary = True)
 train_counts = count_vect.fit_transform(training_data_df['text_lemmatized'][20000:])
 print(train_counts.shape)
 
