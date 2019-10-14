@@ -10,27 +10,23 @@ import time
 import csv
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import string
 from tqdm import tqdm
 from numpy import transpose as T
-from scipy.stats import stats
 from sklearn import tree
 from scipy.stats import mode
-from sklearn.model_selection import cross_validate
 
 
+from nltk.stem import WordNetLemmatizer 
+from nltk import word_tokenize
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
 #import models
 from sklearn.svm import LinearSVC
 from sklearn.naive_bayes import MultinomialNB
-from sklearn import tree
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
-from NaiveBayes import NaiveBayes
 
 num_test_data = 30000
 
@@ -52,7 +48,11 @@ def transback(pred):
     subreddits = pd.read_csv(r'../data/subreddits.csv')
     word = [subreddits['0'][i] for i in pred]
     return word
-
+class LemmaTokenizer(object):
+    def __init__(self):
+        self.wnl = WordNetLemmatizer()
+    def __call__(self, articles):
+        return [self.wnl.lemmatize(t) for t in word_tokenize(articles)]
     
 start_time = time.time()
 #load file
@@ -133,29 +133,6 @@ tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
 '''
 
 
-
-# 5. 1 multinomial naive bayes
-#------------------------------------------------------------------------------
-mnb_train_clf = Pipeline([
-        ('vect',CountVectorizer(binary = True)),
-        ('tfidf',TfidfTransformer()),
-        ('clf', MultinomialNB()),
-        ])
-# 5. 2 multinomial naive bayes: fitting
-#------------------------------------------------------------------------------
-start_time = time.time()
-mnb_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
-finish_time = time.time()
-print("-----Execute in {} sec".format(finish_time - start_time))
-# 5. 3 multinomial naive bayes: predicting
-#------------------------------------------------------------------------------
-mnb_predicted = mnb_train_clf.predict(test_data_df['comments'])
-tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
-# 5. 4 calculate accuracy
-#------------------------------------------------------------------------------
-
-
-
 # 6.1 SVM
 #------------------------------------------------------------------------------
 svm_train_clf= Pipeline([
@@ -178,9 +155,15 @@ tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 # 7. 1 k-nearest neighbors
 #------------------------------------------------------------------------------
 KN_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
+        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
+                       strip_accents = 'unicode',
+                       stop_words = 'english',
+                       lowercase = True,
+                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
+                       max_df = 0.4,
+                       binary = True)),
         ('tfidf',TfidfTransformer()),
-        ('clf', KNeighborsClassifier(n_neighbors=5)),
+        ('clf', KNeighborsClassifier(n_neighbors= 250)),
         ])
 # 7. 2 k-nearest neighbors: fitting
 #------------------------------------------------------------------------------

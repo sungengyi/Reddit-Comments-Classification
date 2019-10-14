@@ -16,7 +16,6 @@ import string
 from tqdm import tqdm
 from numpy import transpose as T
 from scipy.stats import stats
-from sklearn import tree
 from scipy.stats import mode
 from sklearn.model_selection import cross_validate
 
@@ -31,7 +30,6 @@ from sklearn.feature_extraction.text import TfidfTransformer
 #import models
 from sklearn.svm import LinearSVC
 from sklearn.naive_bayes import MultinomialNB
-from sklearn import tree
 from sklearn.linear_model import LogisticRegression
 from NaiveBayes import NaiveBayes
 from sklearn.neighbors import KNeighborsClassifier
@@ -366,15 +364,36 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 #------------------------------------------------------------------------------
 SGD_predicted = SGD_train_clf.predict(training_data_df['comments'][:num_test_data])
 tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
-
 # 8. 4 calculate accuracy
 #------------------------------------------------------------------------------
-print("SGD")
-
 accuracy(SGD_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
-'''
------Accuracy: 0.5472666666666667
-'''
+
+
+
+# 9 1  SGDClassifier
+#------------------------------------------------------------------------------
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
+ADA_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=3),
+        learning_rate=5.0, n_estimators=200, random_state=0)),
+        ])
+# 9. 2   SGDClassifier: fitting
+#------------------------------------------------------------------------------
+start_time = time.time()
+ADA_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
+# 9. 3 SGDClassifier: predicting
+#------------------------------------------------------------------------------
+ADA_predicted = ADA_train_clf.predict(training_data_df['comments'][:num_test_data])
+# 9. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(ADA_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+
+
 
 
 #
