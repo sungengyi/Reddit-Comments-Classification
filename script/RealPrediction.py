@@ -133,29 +133,6 @@ tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
 '''
 
 
-
-# 5. 1 multinomial naive bayes
-#------------------------------------------------------------------------------
-mnb_train_clf = Pipeline([
-        ('vect',CountVectorizer(binary = True)),
-        ('tfidf',TfidfTransformer()),
-        ('clf', MultinomialNB()),
-        ])
-# 5. 2 multinomial naive bayes: fitting
-#------------------------------------------------------------------------------
-start_time = time.time()
-mnb_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
-finish_time = time.time()
-print("-----Execute in {} sec".format(finish_time - start_time))
-# 5. 3 multinomial naive bayes: predicting
-#------------------------------------------------------------------------------
-mnb_predicted = mnb_train_clf.predict(test_data_df['comments'])
-tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
-# 5. 4 calculate accuracy
-#------------------------------------------------------------------------------
-
-
-
 # 6.1 SVM
 #------------------------------------------------------------------------------
 svm_train_clf= Pipeline([
@@ -178,9 +155,15 @@ tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 # 7. 1 k-nearest neighbors
 #------------------------------------------------------------------------------
 KN_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
+        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
+                       strip_accents = 'unicode',
+                       stop_words = 'english',
+                       lowercase = True,
+                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
+                       max_df = 0.4,
+                       binary = True)),
         ('tfidf',TfidfTransformer()),
-        ('clf', KNeighborsClassifier(n_neighbors=5)),
+        ('clf', KNeighborsClassifier(n_neighbors= 250)),
         ])
 # 7. 2 k-nearest neighbors: fitting
 #------------------------------------------------------------------------------
