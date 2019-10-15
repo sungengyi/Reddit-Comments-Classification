@@ -398,7 +398,8 @@ accuracy(ADA_predicted,training_data_df['subreddit_encoding'][:num_test_data], n
 
 
 
-# 10. 1  kMeans
+
+# 10. 1  kMeans（input should be an array)
 #------------------------------------------------------------------------------
 
 KM_train_clf = Pipeline([
@@ -419,6 +420,33 @@ KM_predicted = KM_train_clf.predict(training_data_df['comments'][:num_test_data]
 # 10. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(KM_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+
+
+
+
+# 11. 1  DummyClassifier (不好用)
+#------------------------------------------------------------------------------
+
+DC_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', DummyClassifier()),
+        ])
+# 11. 2   DummyClassifier: fitting
+#------------------------------------------------------------------------------
+start_time = time.time()
+DC_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
+
+# 11. 3 DummyClassifier: predicting
+#------------------------------------------------------------------------------
+DC_predicted = DC_train_clf.predict(training_data_df['comments'][:num_test_data])
+# 11. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+
+
 
 
 
