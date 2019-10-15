@@ -102,7 +102,6 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 #------------------------------------------------------------------------------
 mnb_predicted = mnb_train_clf.predict(training_data_df['comments'][:num_test_data])
 tot_predicted=np.array([mnb_predicted])
-tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
 
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
@@ -273,6 +272,7 @@ tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 
 
+
 # 6. 4 calculate accuracy
 #------------------------------------------------------------------------------
 print("SVM")
@@ -366,33 +366,34 @@ SGD_predicted = SGD_train_clf.predict(training_data_df['comments'][:num_test_dat
 tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
 # 8. 4 calculate accuracy
 #------------------------------------------------------------------------------
+print("SGD")
 accuracy(SGD_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 
-
-
-# 9 1  SGDClassifier
-#------------------------------------------------------------------------------
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.tree import DecisionTreeClassifier
-ADA_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
-        ('tfidf',TfidfTransformer()),
-        ('clf', AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=3),
-        learning_rate=5.0, n_estimators=200, random_state=0)),
-        ])
-# 9. 2   SGDClassifier: fitting
-#------------------------------------------------------------------------------
-start_time = time.time()
-ADA_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
-finish_time = time.time()
-print("-----Execute in {} sec".format(finish_time - start_time))
-# 9. 3 SGDClassifier: predicting
-#------------------------------------------------------------------------------
-ADA_predicted = ADA_train_clf.predict(training_data_df['comments'][:num_test_data])
-# 9. 4 calculate accuracy
-#------------------------------------------------------------------------------
-accuracy(ADA_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
-
+#
+#
+## 9 1  SGDClassifier
+##------------------------------------------------------------------------------
+#from sklearn.ensemble import AdaBoostClassifier
+#from sklearn.tree import DecisionTreeClassifier
+#ADA_train_clf = Pipeline([
+#        ('vect',CountVectorizer()),
+#        ('tfidf',TfidfTransformer()),
+#        ('clf', AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=3),
+#        learning_rate=5.0, n_estimators=200, random_state=0)),
+#        ])
+## 9. 2   SGDClassifier: fitting
+##------------------------------------------------------------------------------
+#start_time = time.time()
+#ADA_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+#finish_time = time.time()
+#print("-----Execute in {} sec".format(finish_time - start_time))
+## 9. 3 SGDClassifier: predicting
+##------------------------------------------------------------------------------
+#ADA_predicted = ADA_train_clf.predict(training_data_df['comments'][:num_test_data])
+## 9. 4 calculate accuracy
+##------------------------------------------------------------------------------
+#accuracy(ADA_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+#
 
 
 
