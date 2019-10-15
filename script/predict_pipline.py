@@ -401,7 +401,7 @@ accuracy(ADA_predicted,training_data_df['subreddit_encoding'][:num_test_data], n
 
 
 
-# 10. 1  kMeans（input should be an array)
+# 10. 1  kMeans（Not working, input should be an array)
 #------------------------------------------------------------------------------
 
 KM_train_clf = Pipeline([
@@ -450,7 +450,7 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 
 
 
-# 12. 1  MLPClassifier
+# 12. 1  MLPClassifier (需要调参！）
 #------------------------------------------------------------------------------
 
 MLP_train_clf = Pipeline([
