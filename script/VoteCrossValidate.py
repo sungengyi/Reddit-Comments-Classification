@@ -177,7 +177,8 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
             svm_predicted = svm_train_clf.predict(X_test)
             tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
             tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
-            
+            #when there is no weight for svm, accuracy is 0.5727
+            #when there is weight, accuracy is 0.5799
             # 6. 4 calculate accuracy
             #------------------------------------------------------------------------------
             print(iter_num,"SVM")
