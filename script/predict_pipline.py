@@ -34,6 +34,8 @@ from sklearn.linear_model import LogisticRegression
 from NaiveBayes import NaiveBayes
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import linear_model
+from sklearn.cluster import KMeans
+from sklearn.dummy import DummyClassifier
 
 num_test_data = 10000 
 def accuracy(predicted,true_outcome,num):
@@ -102,7 +104,6 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 #------------------------------------------------------------------------------
 mnb_predicted = mnb_train_clf.predict(training_data_df['comments'][:num_test_data])
 tot_predicted=np.array([mnb_predicted])
-tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
 
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
@@ -273,6 +274,7 @@ tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 
 
+
 # 6. 4 calculate accuracy
 #------------------------------------------------------------------------------
 print("SVM")
@@ -366,11 +368,13 @@ SGD_predicted = SGD_train_clf.predict(training_data_df['comments'][:num_test_dat
 tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
 # 8. 4 calculate accuracy
 #------------------------------------------------------------------------------
+print("SGD")
 accuracy(SGD_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 
 
 
-# 9 1  SGDClassifier
+
+# 9 1  AdaBoostClassifier
 #------------------------------------------------------------------------------
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -380,7 +384,7 @@ ADA_train_clf = Pipeline([
         ('clf', AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=3),
         learning_rate=5.0, n_estimators=200, random_state=0)),
         ])
-# 9. 2   SGDClassifier: fitting
+# 9. 2  AdaBoostClassifier: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
 ADA_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
@@ -392,6 +396,59 @@ ADA_predicted = ADA_train_clf.predict(training_data_df['comments'][:num_test_dat
 # 9. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(ADA_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+
+
+
+
+# 10. 1  kMeans（input should be an array)
+#------------------------------------------------------------------------------
+
+KM_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', KMeans()),
+        ])
+# 10. 2   kMeans: fitting
+#------------------------------------------------------------------------------
+start_time = time.time()
+KM_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
+
+# 10. 3 kMeans: predicting
+#------------------------------------------------------------------------------
+KM_predicted = KM_train_clf.predict(training_data_df['comments'][:num_test_data])
+# 10. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(KM_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+
+
+
+
+# 11. 1  DummyClassifier (不好用)
+#------------------------------------------------------------------------------
+
+DC_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', DummyClassifier()),
+        ])
+# 11. 2   DummyClassifier: fitting
+#------------------------------------------------------------------------------
+start_time = time.time()
+DC_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
+
+# 11. 3 DummyClassifier: predicting
+#------------------------------------------------------------------------------
+DC_predicted = DC_train_clf.predict(training_data_df['comments'][:num_test_data])
+# 11. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+
+
+
 
 
 
