@@ -41,6 +41,8 @@ from sklearn.linear_model import LogisticRegression
 from NaiveBayes import NaiveBayes
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import linear_model
+from sklearn.neural_network import MLPClassifier
+
 
 def accuracy(predicted,true_outcome,num,index):
     accuracy = 0
@@ -237,6 +239,34 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
             #------------------------------------------------------------------------------
             print(iter_num,"SGD")
             accuracy(SGD_predicted,y_test,num_data,index)
+            
+                        
+            # 12. 1  MLPClassifier(需要调参！！！！)
+            #------------------------------------------------------------------------------
+            
+            MLP_train_clf = Pipeline([
+                    ('vect',CountVectorizer()),
+                    ('tfidf',TfidfTransformer()),
+                    ('clf', MLPClassifier(early_stopping = True,learning_rate ="adaptive",max_iter = 100)),
+                    ])
+            # 12. 2   MLPClassifier: fitting
+            #------------------------------------------------------------------------------
+            print("MLP: Start executing...")
+            start_time = time.time()
+            MLP_train_clf.fit(X_train,y_train)
+            finish_time = time.time()
+            print("-----Execute in {} sec".format(finish_time - start_time))
+            
+            # 12. 3 MLPClassifier: predicting
+            #------------------------------------------------------------------------------
+            MLP_predicted = MLP_train_clf.predict(X_test)
+            # 12. 4 calculate accuracy
+            #------------------------------------------------------------------------------
+            print(iter_num,"MLP")
+            accuracy(MLP_predicted,y_test,num_data,index)
+            
+            
+
         
             
             vp = votepredict(tot_predicted)

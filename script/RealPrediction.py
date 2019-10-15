@@ -27,6 +27,7 @@ from sklearn.svm import LinearSVC
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
 
 num_test_data = 30000
 
@@ -174,9 +175,36 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 # 7. 3 k-nearest neighbors: predicting
 #------------------------------------------------------------------------------
 KN_predicted = KN_train_clf.predict(training_data_df['comments'])
-tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
+tot_predicted=np.append(tot_predicted,[KN_predicted],axis=0)
 # 7. 4 calculate accuracy
 #------------------------------------------------------------------------------
+
+
+
+# 12. 1  MLPClassifier(需要调参！！！！)
+#------------------------------------------------------------------------------
+
+MLP_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', MLPClassifier(early_stopping = True,learning_rate ="adaptive",max_iter = 100)),
+        ])
+# 12. 2   MLPClassifier: fitting
+#------------------------------------------------------------------------------
+start_time = time.time()
+MLP_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
+
+# 12. 3 MLPClassifier: predicting
+#------------------------------------------------------------------------------
+MLP_predicted = MLP_train_clf.predict(training_data_df['comments'][:num_test_data])
+tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
+# 12. 4 calculate accuracy
+#------------------------------------------------------------------------------
+
+
+
 
 
 
