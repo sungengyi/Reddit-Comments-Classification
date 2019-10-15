@@ -35,6 +35,7 @@ from NaiveBayes import NaiveBayes
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import linear_model
 from sklearn.cluster import KMeans
+from sklearn.dummy import DummyClassifier
 
 num_test_data = 10000 
 def accuracy(predicted,true_outcome,num):
