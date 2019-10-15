@@ -451,7 +451,7 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 
 
 # 12. 1  MLPClassifier(需要调参！！！！)
-
+'''----Test with early_stopping = True,learning_rate ="adaptive",max_iter = 100
 #   Runtime:    Accuracy
 #   193s          0.5744
 #   260s          0.581
@@ -459,13 +459,30 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 #   184s          0.5853
 #   177s          0.5842
 #   306s          0.5794
+'''
+
+'''---Test with solver = "sgd"
+
+     Runtime     Accuracy
+     52.29s       0.051
+     213          0.0614
+
+'''
 #------------------------------------------------------------------------------
 
 MLP_train_clf = Pipeline([
         ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
-        ('clf', MLPClassifier(early_stopping = True,learning_rate ="adaptive",max_iter = 100)),
+        ('clf', MLPClassifier(learning_rate ="adaptive")),
         ])
+ '''   
+    #activation : logistic(accuracy too low)
+    #             identity(0.5724) 235s
+                   tanh   （0.577）  190s
+    
+    #solver:       lbfgs(not applicable)
+                   sgd(too low)
+'''
 # 12. 2   MLPClassifier: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()

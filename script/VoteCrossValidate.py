@@ -247,7 +247,7 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
             MLP_train_clf = Pipeline([
                     ('vect',CountVectorizer()),
                     ('tfidf',TfidfTransformer()),
-                    ('clf', MLPClassifier(early_stopping = True,learning_rate ="adaptive",max_iter = 100)),
+                    ('clf', MLPClassifier(learning_rate ="adaptive")),
                     ])
             # 12. 2   MLPClassifier: fitting
             #------------------------------------------------------------------------------
