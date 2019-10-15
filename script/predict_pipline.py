@@ -450,7 +450,7 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 
 
 
-# 12. 1  MLPClassifier
+# 12. 1  MLPClassifier(需要调参！！！！)
 #------------------------------------------------------------------------------
 
 MLP_train_clf = Pipeline([
