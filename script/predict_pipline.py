@@ -452,6 +452,13 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 
 # 12. 1  MLPClassifier(需要调参！！！！)
 
+#   Runtime:    Accuracy
+#   193s          0.5744
+#   260s          0.581
+#   158s          0.5772
+#   184s          0.5853
+#   177s          0.5842
+#   306s          0.5794
 #------------------------------------------------------------------------------
 
 MLP_train_clf = Pipeline([
