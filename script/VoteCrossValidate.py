@@ -42,11 +42,11 @@ from NaiveBayes import NaiveBayes
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import linear_model
 
-def accuracy(predicted,true_outcome,num):
+def accuracy(predicted,true_outcome,num,index):
     accuracy = 0
-    index = 0
     for result in predicted:
         if result == true_outcome[index]:
+            
             accuracy+=1
         index+=1
     print("-----Accuracy:", accuracy/num)
@@ -90,14 +90,17 @@ print("-----File Loaded in {} sec".format(finish_time - start_time))
 
 
 
-def VoteAndCrossValidate(X,Y,splits):
+def VoteAndCrossValidate(X,Y,splits,num_data):
         final_acc = 0
         kf = KFold(n_splits = splits)
         kf.get_n_splits(X)
+        index = 0
+        iter_num = 1
         for train_index, test_index in kf.split(X):
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
-                  
+            
+     
             # 1. 1 multinomial naive bayes
             #------------------------------------------------------------------------------
             mnb_train_clf = Pipeline([
@@ -123,8 +126,8 @@ def VoteAndCrossValidate(X,Y,splits):
             tot_predicted=np.array([mnb_predicted])       
             # 1. 4 calculate accuracy
             #------------------------------------------------------------------------------
-            print("MNB")
-            accuracy(mnb_predicted,y_test)
+            print(iter_num,"MNB")
+            accuracy(mnb_predicted,y_test,num_data,index)
                    
             # 3. 1 logistic regression
             #------------------------------------------------------------------------------
@@ -152,8 +155,8 @@ def VoteAndCrossValidate(X,Y,splits):
             tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
             # 3. 4 calculate accuracy
             #------------------------------------------------------------------------------
-            print("LR")      
-            accuracy(lr_predicted,y_test)
+            print(iter_num,"LR")      
+            accuracy(lr_predicted,y_test,num_data,index)
           
             
             # 6.1 SVM
@@ -177,9 +180,9 @@ def VoteAndCrossValidate(X,Y,splits):
             
             # 6. 4 calculate accuracy
             #------------------------------------------------------------------------------
-            print("SVM")
+            print(iter_num,"SVM")
             
-            accuracy(svm_predicted,y_test)
+            accuracy(svm_predicted,y_test,num_data,index)
            
             # 7. 1 k-nearest neighbors
             #------------------------------------------------------------------------------
@@ -207,9 +210,9 @@ def VoteAndCrossValidate(X,Y,splits):
             tot_predicted=np.append(tot_predicted,[KN_predicted],axis=0)
             # 7. 4 calculate accuracy
             #------------------------------------------------------------------------------
-            print("KN")
+            print(iter_num,"KN")
             
-            accuracy(KN_predicted,y_test)
+            accuracy(KN_predicted,y_test,num_data,index)
             
             
             # 8 1  SGDClassifier
@@ -231,21 +234,27 @@ def VoteAndCrossValidate(X,Y,splits):
             tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
             # 8. 4 calculate accuracy
             #------------------------------------------------------------------------------
-            print("SGD")
-            accuracy(SGD_predicted,y_test)
+            print(iter_num,"SGD")
+            accuracy(SGD_predicted,y_test,num_data,index)
         
             
             vp = votepredict(tot_predicted)
-            print("Vote")
+            print(iter_num,"Vote")
             
-            final_acc +=accuracy(vp,y_test)
-            
+            final_acc +=accuracy(vp,y_test,num_data,index)
+            index+=num_data
+            iter_num+=1
+        print("Final acc:",final_acc / splits)  
         return final_acc / splits
 
 
 start_time = time.time()
+start = 0
+end = 10000
+X = training_data_df['comments'][:end]
+y = training_data_df['subreddit_encoding'][:end]
+acc = VoteAndCrossValidate(X,y,10,1000)
 
-VoteAndCrossValidate(training_data_df['comments'],training_data_df['subreddit_encoding'],10)
 
 finish_time = time.time()
 print("-----File Loaded in {} sec".format(finish_time - start_time))
