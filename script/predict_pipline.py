@@ -36,6 +36,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn import linear_model
 from sklearn.cluster import KMeans
 from sklearn.dummy import DummyClassifier
+from sklearn.neural_network import MLPClassifier
 
 num_test_data = 10000 
 def accuracy(predicted,true_outcome,num):
@@ -446,6 +447,30 @@ DC_predicted = DC_train_clf.predict(training_data_df['comments'][:num_test_data]
 # 11. 4 calculate accuracy
 #------------------------------------------------------------------------------
 accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+
+
+
+# 12. 1  MLPClassifier
+#------------------------------------------------------------------------------
+
+MLP_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', MLPClassifier(learning_rate ="adaptive")),
+        ])
+# 12. 2   MLPClassifier: fitting
+#------------------------------------------------------------------------------
+start_time = time.time()
+MLP_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
+
+# 12. 3 MLPClassifier: predicting
+#------------------------------------------------------------------------------
+MLP_predicted = MLP_train_clf.predict(training_data_df['comments'][:num_test_data])
+# 12. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(MLP_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 
 
 
