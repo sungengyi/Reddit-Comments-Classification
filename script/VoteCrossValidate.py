@@ -250,10 +250,11 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
 
 start_time = time.time()
 start = 0
-end = 10000
+end = 70000
+split = 7
 X = training_data_df['comments'][:end]
 y = training_data_df['subreddit_encoding'][:end]
-acc = VoteAndCrossValidate(X,y,10,1000)
+acc = VoteAndCrossValidate(X,y,split,(int)(end - start)/split)
 
 
 finish_time = time.time()
