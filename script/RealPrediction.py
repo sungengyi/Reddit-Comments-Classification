@@ -27,6 +27,7 @@ from sklearn.svm import LinearSVC
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn import linear_model
 
 num_test_data = 30000
 
@@ -87,6 +88,7 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 #------------------------------------------------------------------------------
 mnb_predicted = mnb_train_clf.predict(test_data_df['comments'])
 tot_predicted=np.array([mnb_predicted])
+tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
 
@@ -112,7 +114,7 @@ lr_train_clf = Pipeline([
 # 3. 2 logistic regression: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
-lr_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+lr_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
 finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 3. 3 logistic regression: predicting
@@ -136,9 +138,9 @@ tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
 # 6.1 SVM
 #------------------------------------------------------------------------------
 svm_train_clf= Pipeline([
-        ('vect',CountVectorizer()),
+        ('vect',CountVectorizer(binary = True)),
         ('tfidf',TfidfTransformer()),
-        ('clf', LinearSVC(1.0)),
+        ('clf', LinearSVC(C = 0.2)),
         ])
 # 6. 2 svm: fitting
 #------------------------------------------------------------------------------
@@ -146,6 +148,7 @@ svm_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encod
 # 6. 3 svm: predicting
 #------------------------------------------------------------------------------
 svm_predicted = svm_train_clf.predict(test_data_df['comments'])
+tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 # 6. 4 calculate accuracy
 #------------------------------------------------------------------------------
@@ -173,11 +176,31 @@ finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 7. 3 k-nearest neighbors: predicting
 #------------------------------------------------------------------------------
-KN_predicted = KN_train_clf.predict(training_data_df['comments'])
-tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
+KN_predicted = KN_train_clf.predict(test_data_df['comments'])
+tot_predicted=np.append(tot_predicted,[KN_predicted],axis=0)
 # 7. 4 calculate accuracy
 #------------------------------------------------------------------------------
 
+
+
+
+SGD_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', linear_model.SGDClassifier()),
+        ])
+# 8. 2   SGDClassifier: fitting
+#------------------------------------------------------------------------------
+start_time = time.time()
+SGD_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
+# 8. 3 SGDClassifier: predicting
+#------------------------------------------------------------------------------
+SGD_predicted = SGD_train_clf.predict(test_data_df['comments'])
+tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
+# 8. 4 calculate accuracy
+#------------------------------------------------------------------------------
 
 
 # Final step
@@ -185,7 +208,7 @@ tot_predicted=np.append(tot_predicted,[mnb_predicted],axis=0)
 vp = votepredict(tot_predicted)
 vp = transback(vp)
 df = pd.DataFrame({'Category': vp})
-df.to_csv(r'solution.csv')
+df.to_csv(r'solution_1.csv')
 
 
 
