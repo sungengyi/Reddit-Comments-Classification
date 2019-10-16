@@ -139,7 +139,7 @@ tot_predicted=np.append(tot_predicted,[lr_predicted],axis=0)
 svm_train_clf= Pipeline([
         ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
-        ('clf', LinearSVC(1.0)),
+        ('clf', LinearSVC(C=0.2)),
         ])
 # 6. 2 svm: fitting
 #------------------------------------------------------------------------------
