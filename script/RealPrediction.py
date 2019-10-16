@@ -187,10 +187,11 @@ tot_predicted=np.append(tot_predicted,[KN_predicted],axis=0)
 MLP_train_clf = Pipeline([
         ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
-        ('clf', MLPClassifier(early_stopping = True,learning_rate ="adaptive",max_iter = 100)),
+        ('clf', MLPClassifier(learning_rate ="adaptive")),
         ])
 # 12. 2   MLPClassifier: fitting
 #------------------------------------------------------------------------------
+print("-----MLP: Start executing..."）
 start_time = time.time()
 MLP_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
 finish_time = time.time()
