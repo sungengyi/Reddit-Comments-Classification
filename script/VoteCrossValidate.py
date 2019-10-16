@@ -101,8 +101,8 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
         for train_index, test_index in kf.split(X):
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
+              
             
-     
             # 1. 1 multinomial naive bayes
             #------------------------------------------------------------------------------
             mnb_train_clf = Pipeline([
@@ -186,7 +186,7 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
             print(iter_num,"SVM")
             
             accuracy(svm_predicted,y_test,num_data,index)
-           
+  
             # 7. 1 k-nearest neighbors
             #------------------------------------------------------------------------------
             KN_train_clf = Pipeline([
@@ -239,8 +239,8 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
             #------------------------------------------------------------------------------
             print(iter_num,"SGD")
             accuracy(SGD_predicted,y_test,num_data,index)
+        
             
-                        
             # 12. 1  MLPClassifier(需要调参！！！！)
             #------------------------------------------------------------------------------
             
@@ -260,6 +260,7 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
             # 12. 3 MLPClassifier: predicting
             #------------------------------------------------------------------------------
             MLP_predicted = MLP_train_clf.predict(X_test)
+            tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
             # 12. 4 calculate accuracy
             #------------------------------------------------------------------------------
             print(iter_num,"MLP")

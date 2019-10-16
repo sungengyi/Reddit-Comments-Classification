@@ -459,6 +459,16 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 #   184s          0.5853
 #   177s          0.5842
 #   306s          0.5794
+    101s          0.5717
+    
+    
+    ----Test withlearning_rate ="adaptive"
+    666s          0.5279
+    127s          0.5867
+    187s          0.5906
+    206s          0.577
+    116.9s        0.5785
+    150s          0.5791
 '''
 
 '''---Test with solver = "sgd"
