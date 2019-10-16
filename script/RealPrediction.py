@@ -29,7 +29,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 
-num_test_data = 30000
+
 
 def accuracy(predicted,true_outcome,num):
     accuracy = 0
@@ -113,7 +113,7 @@ lr_train_clf = Pipeline([
 # 3. 2 logistic regression: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
-lr_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+lr_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
 finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 3. 3 logistic regression: predicting
@@ -143,10 +143,14 @@ svm_train_clf= Pipeline([
         ])
 # 6. 2 svm: fitting
 #------------------------------------------------------------------------------
+start_time = time.time()
 svm_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
 # 6. 3 svm: predicting
 #------------------------------------------------------------------------------
 svm_predicted = svm_train_clf.predict(test_data_df['comments'])
+tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 tot_predicted=np.append(tot_predicted,[svm_predicted],axis=0)
 # 6. 4 calculate accuracy
 #------------------------------------------------------------------------------
@@ -174,7 +178,7 @@ finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 7. 3 k-nearest neighbors: predicting
 #------------------------------------------------------------------------------
-KN_predicted = KN_train_clf.predict(training_data_df['comments'])
+KN_predicted = KN_train_clf.predict(test_data_df['comments'])
 tot_predicted=np.append(tot_predicted,[KN_predicted],axis=0)
 # 7. 4 calculate accuracy
 #------------------------------------------------------------------------------
@@ -191,15 +195,15 @@ MLP_train_clf = Pipeline([
         ])
 # 12. 2   MLPClassifier: fitting
 #------------------------------------------------------------------------------
-print("-----MLP: Start executing..."）
+print('-----MLP: Start executing...')
 start_time = time.time()
-MLP_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+MLP_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
 finish_time = time.time()
-print("-----Execute in {} sec".format(finish_time - start_time))
+print('-----Execute in {} sec'.format(finish_time - start_time))
 
 # 12. 3 MLPClassifier: predicting
 #------------------------------------------------------------------------------
-MLP_predicted = MLP_train_clf.predict(training_data_df['comments'][:num_test_data])
+MLP_predicted = MLP_train_clf.predict(test_data_df['comments'])
 tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
 # 12. 4 calculate accuracy
 #------------------------------------------------------------------------------
