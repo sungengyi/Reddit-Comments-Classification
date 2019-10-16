@@ -37,6 +37,7 @@ from sklearn import linear_model
 from sklearn.cluster import KMeans
 from sklearn.dummy import DummyClassifier
 from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 num_test_data = 10000 
 def accuracy(predicted,true_outcome,num):
@@ -357,6 +358,15 @@ SGD_train_clf = Pipeline([
         ('tfidf',TfidfTransformer()),
         ('clf', linear_model.SGDClassifier()),
         ])
+    
+'''
+ ------ penalty = "elasticnet"          0.506
+                = "l1"                  0.3613
+                = "none"                0.5265
+                
+ ------ loss =  "perceptron"            0.4707
+             =  "epsilon_insensitive"   0.5559
+'''
 # 8. 2   SGDClassifier: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
@@ -366,7 +376,7 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 # 8. 3 SGDClassifier: predicting
 #------------------------------------------------------------------------------
 SGD_predicted = SGD_train_clf.predict(training_data_df['comments'][:num_test_data])
-tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
+#tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
 # 8. 4 calculate accuracy
 #------------------------------------------------------------------------------
 print("SGD")
@@ -451,50 +461,49 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 
 
 # 12. 1  MLPClassifier(需要调参！！！！)
-'''----Test with early_stopping = True,learning_rate ="adaptive",max_iter = 100
-#   Runtime:    Accuracy
-#   193s          0.5744
-#   260s          0.581
-#   158s          0.5772
-#   184s          0.5853
-#   177s          0.5842
-#   306s          0.5794
-    101s          0.5717
-    
-    
-    ----Test withlearning_rate ="adaptive"
-    666s          0.5279
-    127s          0.5867
-    187s          0.5906
-    206s          0.577
-    116.9s        0.5785
-    150s          0.5791
-'''
-
-'''---Test with solver = "sgd"
-
-     Runtime     Accuracy
-     52.29s       0.051
-     213          0.0614
-
-'''
+     
 #------------------------------------------------------------------------------
-
+ '''----Test with early_stopping = True,learning_rate ="adaptive",max_iter = 100
+        #   Runtime:    Accuracy
+        #   193s          0.5744
+        #   260s          0.581
+        #   158s          0.5772
+        #   184s          0.5853
+        #   177s          0.5842
+        #   306s          0.5794
+            101s          0.5717
+        
+            ----Test withlearning_rate ="adaptive"
+            666s          0.5279
+            127s          0.5867
+            187s          0.5906
+            206s          0.577
+            116.9s        0.5785
+            150s          0.5791
+        
+        ---Test with solver = "sgd"
+        
+             Runtime     Accuracy
+             52.29s       0.051
+             213          0.0614
+        
+'''
 MLP_train_clf = Pipeline([
         ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
         ('clf', MLPClassifier(learning_rate ="adaptive")),
         ])
- '''   
-    #activation : logistic(accuracy too low)
-    #             identity(0.5724) 235s
-                   tanh   （0.577）  190s
-    
-    #solver:       lbfgs(not applicable)
-                   sgd(too low)
+'''
+            #activation : logistic(accuracy too low)
+            #             identity(0.5724) 235s
+                           tanh   （0.577）  190s
+            
+            #solver:       lbfgs(not applicable)
+                           sgd(too low)
 '''
 # 12. 2   MLPClassifier: fitting
 #------------------------------------------------------------------------------
+print("----MLP: start executing...")
 start_time = time.time()
 MLP_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
 finish_time = time.time()
@@ -508,6 +517,32 @@ MLP_predicted = MLP_train_clf.predict(training_data_df['comments'][:num_test_dat
 accuracy(MLP_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 
 
+
+
+
+
+# 13. 1  RandomForestClassifier（太慢了 跑不动）
+#------------------------------------------------------------------------------
+
+RF_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', RandomForestClassifier(n_estimators=100)),
+        ])
+# 13. 2   RandomForestClassifier: fitting
+#------------------------------------------------------------------------------
+print("----RandomForest: start executing...")
+start_time = time.time()
+RF_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
+
+# 13. 3 RandomForestClassifier: predicting
+#------------------------------------------------------------------------------
+RF_predicted = RF_train_clf.predict(training_data_df['comments'][:num_test_data])
+# 13. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(RF_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 
 
 
