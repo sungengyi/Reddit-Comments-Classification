@@ -476,16 +476,37 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
      Runtime     Accuracy
      52.29s       0.051
      213          0.0614
+     
+     
+     -----Learning rate and iter time
+     - 0.001 -- 216s
+     - 1 : ConvergenceWarning: Stochastic Optimizer: Maximum iterations (1) reached and the optimization hasn't converged yet.
+  % self.max_iter, ConvergenceWarning)
+-----Execute in 185.87604212760925 sec
+    - 0.005 -- 173s -- 1 iter
+        -----Accuracy: 0.5734
+    - 0.01 -- 208s 
+        -----Accuracy: 0.5656
 
 '''
 #------------------------------------------------------------------------------
 
 MLP_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
+        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
+                       strip_accents = 'unicode',
+                       stop_words = 'english',
+                       lowercase = True,
+                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
+                       max_df = 0.5,
+                       min_df = 1,
+                       binary = True)),
         ('tfidf',TfidfTransformer()),
-        ('clf', MLPClassifier(learning_rate ="adaptive")),
+        ('clf', MLPClassifier(learning_rate ="invscaling",
+                              learning_rate_init = 0.01,
+                              max_iter = 1,
+                              verbose = True)),
         ])
- '''   
+'''   
     #activation : logistic(accuracy too low)
     #             identity(0.5724) 235s
                    tanh   （0.577）  190s
