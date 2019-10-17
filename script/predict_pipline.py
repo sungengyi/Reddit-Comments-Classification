@@ -22,6 +22,7 @@ from sklearn.model_selection import cross_validate
 from nltk.stem import WordNetLemmatizer 
 from nltk import word_tokenize         
 
+import re
 
 
 from sklearn.feature_extraction.text import CountVectorizer
@@ -58,12 +59,18 @@ def transback(pred):
     subreddits = pd.read_csv(r'../data/subreddits.csv')
     word = [subreddits['0'][i] for i in pred]
     return word
-
+#
+#class LemmaTokenizer(object):
+#    def __init__(self):
+#        self.wnl = WordNetLemmatizer()
+#    def __call__(self, articles):
+#        return [self.wnl.lemmatize(t) for t in word_tokenize(articles)]
+    
 class LemmaTokenizer(object):
     def __init__(self):
         self.wnl = WordNetLemmatizer()
     def __call__(self, articles):
-        return [self.wnl.lemmatize(t) for t in word_tokenize(articles)]
+        return [self.wnl.lemmatize(t) for t in re.split('\d|\\\|\s|[,.;:?!]|[/()]|\*',articles)]
     
 def averageAcc(cv_results,fold):
     average = 0
@@ -463,9 +470,9 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 # 12. 1  MLPClassifier(需要调参！！！！)
      
 #------------------------------------------------------------------------------
- '''----Test with early_stopping = True,learning_rate ="adaptive",max_iter = 100
+'''
+ ----Test with early_stopping = True,learning_rate ="adaptive",max_iter = 100
         #   Runtime:    Accuracy
-        #   193s          0.5744
         #   260s          0.581
         #   158s          0.5772
         #   184s          0.5853
@@ -507,6 +514,9 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
     - 0.004 -- 176 0.5752
     - 0.004 iter 2 312  0.5534
     - 0.004 iter 5 717  0.5112
+    - 0.004 lemma 
+    -----Execute in 152.74802780151367 sec
+    -----Accuracy: 0.5785
     
 
 '''
@@ -518,12 +528,12 @@ MLP_train_clf = Pipeline([
                        stop_words = 'english',
                        lowercase = True,
                        token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
-                       max_df = 0.5,
+#                       max_df = 0.5,
                        min_df = 1,
                        binary = True)),
         ('tfidf',TfidfTransformer()),
         ('clf', MLPClassifier(learning_rate ="invscaling",
-                              learning_rate_init = 0.01,
+                              learning_rate_init = 0.004,
                               max_iter = 1,
                               verbose = True)),
         ])
