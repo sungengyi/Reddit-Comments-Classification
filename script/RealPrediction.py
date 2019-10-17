@@ -7,15 +7,10 @@ Created on Fri Oct 11 21:26:34 2019
 
 from sklearn.pipeline import Pipeline
 import time
-import csv
 import numpy as np
 import pandas as pd
-import string
-from tqdm import tqdm
-from numpy import transpose as T
-from sklearn import tree
 from scipy.stats import mode
-
+import re
 
 from nltk.stem import WordNetLemmatizer 
 from nltk import word_tokenize
@@ -53,7 +48,7 @@ class LemmaTokenizer(object):
     def __init__(self):
         self.wnl = WordNetLemmatizer()
     def __call__(self, articles):
-        return [self.wnl.lemmatize(t) for t in word_tokenize(articles)]
+        return [self.wnl.lemmatize(t) for t in re.split('\/|\.|\s|\?|\!|;|,|\*',articles)]
     
 start_time = time.time()
 #load file
@@ -205,6 +200,7 @@ print('-----Execute in {} sec'.format(finish_time - start_time))
 #------------------------------------------------------------------------------
 MLP_predicted = MLP_train_clf.predict(test_data_df['comments'])
 tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
+tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
 # 12. 4 calculate accuracy
 #------------------------------------------------------------------------------
 
@@ -218,7 +214,7 @@ tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
 vp = votepredict(tot_predicted)
 vp = transback(vp)
 df = pd.DataFrame({'Category': vp})
-df.to_csv(r'solution.csv')
+df.to_csv(r'solution_1.csv')
 
 
 
