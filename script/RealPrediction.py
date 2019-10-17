@@ -13,11 +13,11 @@ from scipy.stats import mode
 import re
 
 from nltk.stem import WordNetLemmatizer 
-from nltk import word_tokenize
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
 #import models
+from sklearn import linear_model
 from sklearn.svm import LinearSVC
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
@@ -178,7 +178,20 @@ tot_predicted=np.append(tot_predicted,[KN_predicted],axis=0)
 # 7. 4 calculate accuracy
 #------------------------------------------------------------------------------
 
-
+SGD_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', linear_model.SGDClassifier()),
+        ])
+    
+start_time = time.time()
+SGD_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
+# 8. 3 SGDClassifier: predicting
+#------------------------------------------------------------------------------
+SGD_predicted = SGD_train_clf.predict(test_data_df['comments'])
+tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
 
 # 12. 1  MLPClassifier(需要调参！！！！)
 #------------------------------------------------------------------------------
