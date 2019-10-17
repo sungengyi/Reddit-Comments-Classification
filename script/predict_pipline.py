@@ -525,9 +525,15 @@ accuracy(MLP_predicted,training_data_df['subreddit_encoding'][:num_test_data], n
 #------------------------------------------------------------------------------
 
 RF_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
+        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
+                       strip_accents = 'unicode',
+                       stop_words = 'english',
+                       lowercase = True,
+                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
+                       max_df = 0.5,
+                       min_df = 1)),
         ('tfidf',TfidfTransformer()),
-        ('clf', RandomForestClassifier(n_estimators=100)),
+        ('clf', RandomForestClassifier(n_estimators=100,n_jobs=3)),
         ])
 # 13. 2   RandomForestClassifier: fitting
 #------------------------------------------------------------------------------
@@ -544,7 +550,16 @@ RF_predicted = RF_train_clf.predict(training_data_df['comments'][:num_test_data]
 #------------------------------------------------------------------------------
 accuracy(RF_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 
-
+'''
+1. Test with test = 10000
+RF_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', RandomForestClassifier(n_estimators=100,n_jobs=3)),
+        ])
+-----Execute in 142.33186316490173 sec
+-----Accuracy: 0.4342
+'''
 
 
 

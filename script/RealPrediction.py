@@ -48,7 +48,7 @@ class LemmaTokenizer(object):
     def __init__(self):
         self.wnl = WordNetLemmatizer()
     def __call__(self, articles):
-        return [self.wnl.lemmatize(t) for t in re.split('\/|\.|\s|\?|\!|;|,|\*',articles)]
+        return [self.wnl.lemmatize(t) for t in re.split('\d|\\\|\s|[,.;:?!]|[/()]|\*',articles)]
     
 start_time = time.time()
 #load file
