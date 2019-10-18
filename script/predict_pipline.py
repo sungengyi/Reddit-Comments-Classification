@@ -40,7 +40,7 @@ from sklearn.dummy import DummyClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier
 
-num_test_data = 10000 
+num_test_data = 70000 
 def accuracy(predicted,true_outcome,num):
     accuracy = 0
     index = 0
@@ -83,12 +83,16 @@ def averageAcc(cv_results,fold):
 start_time = time.time()
 #load file
 #------------------------------------------------------------------------------
-training_data_df = pd.read_csv(r'../data/encoded_reddit_train.csv')
-test_data_df = pd.read_csv(r'../data/original_data/reddit_test.csv')
+training_data_df = pd.read_csv(r'../data/encoded_baozi.csv')
+test_data_df = pd.read_csv(r'../data/encoded_reddit_train.csv')
 finish_time = time.time()
 print("-----File Loaded in {} sec".format(finish_time - start_time))
 
-
+def process_junk(data):
+    data = data.sample(frac=1).reset_index(drop=True)
+    data = data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
+    data = data[data['comments'].apply(lambda x: len(str(x))>50)]
+    return data
 
 # 1. 1 multinomial naive bayes
 #------------------------------------------------------------------------------
@@ -106,18 +110,18 @@ mnb_train_clf = Pipeline([
 # 1. 2 multinomial naive bayes: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
-mnb_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+mnb_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
 finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 1. 3 multinomial naive bayes: predicting
 #------------------------------------------------------------------------------
-mnb_predicted = mnb_train_clf.predict(training_data_df['comments'][:num_test_data])
+mnb_predicted = mnb_train_clf.predict(test_data_df['comments'])
 tot_predicted=np.array([mnb_predicted])
 
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
 print("MNB")
-accuracy(mnb_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+accuracy(mnb_predicted,test_data_df['subreddit_encoding'], num_test_data)
 '''
  53.57 with binary = True, 53.85 with False, num_test_data = 30000
 1. -----Accuracy: 0.5557 / 10000
@@ -583,7 +587,7 @@ RF_train_clf = Pipeline([
                        max_df = 0.5,
                        min_df = 1)),
         ('tfidf',TfidfTransformer()),
-        ('clf', RandomForestClassifier(n_estimators=100,n_jobs=3)),
+        ('clf', RandomForestClassifier(n_estimators=150,n_jobs=3)),
         ])
 # 13. 2   RandomForestClassifier: fitting
 #------------------------------------------------------------------------------

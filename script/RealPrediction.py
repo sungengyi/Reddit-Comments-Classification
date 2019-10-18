@@ -197,9 +197,19 @@ tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
 #------------------------------------------------------------------------------
 
 MLP_train_clf = Pipeline([
-        ('vect',CountVectorizer()),
+        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
+                       strip_accents = 'unicode',
+                       stop_words = 'english',
+                       lowercase = True,
+                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
+                       max_df = 0.5,
+                       min_df = 1,
+                       binary = True)),
         ('tfidf',TfidfTransformer()),
-        ('clf', MLPClassifier(learning_rate ="adaptive")),
+        ('clf', MLPClassifier(learning_rate ="invscaling",
+                              learning_rate_init = 0.004,
+                              max_iter = 1,
+                              verbose = True)),
         ])
 # 12. 2   MLPClassifier: fitting
 #------------------------------------------------------------------------------
@@ -217,8 +227,7 @@ tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
 # 12. 4 calculate accuracy
 #------------------------------------------------------------------------------
 
-
-
+tot_predicted = tot_predicted[:-2]
 
 
 
