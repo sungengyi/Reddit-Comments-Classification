@@ -525,21 +525,36 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 
 '''
 #------------------------------------------------------------------------------
+
 MLP_train_clf = Pipeline([
         ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
                        strip_accents = 'unicode',
                        stop_words = 'english',
                        lowercase = True,
                        token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
-                       max_df = 0.5,
+#                       max_df = 0.5,
                        min_df = 1,
                        binary = True)),
         ('tfidf',TfidfTransformer()),
-        ('clf', MLPClassifier(learning_rate ="adaptive",
+        ('clf', MLPClassifier(learning_rate ="invscaling",
                               learning_rate_init = 0.004,
-                              max_iter = 3,
+                              max_iter = 1,
                               verbose = True)),
         ])
+'''
+    #activation : logistic(accuracy too low)
+    #             identity(0.5724) 235s
+                   tanh   （0.577）  190s
+    
+    #solver:       lbfgs(not applicable)
+                   sgd(too low)
+            #activation : logistic(accuracy too low)
+            #             identity(0.5724) 235s
+                           tanh   （0.577）  190s
+            
+            #solver:       lbfgs(not applicable)
+                           sgd(too low)
+'''
 # 12. 2   MLPClassifier: fitting
 #------------------------------------------------------------------------------
 print("----MLP: start executing...")
@@ -555,30 +570,9 @@ MLP_predicted = MLP_train_clf.predict(training_data_df['comments'][:num_test_dat
 #------------------------------------------------------------------------------
 accuracy(MLP_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 
-'''
-Cooking Time : lemma, num 10000, learning rate 0.004
-    1. 60, 51.73
-        70, 5711
-       90, 54.79
-       120, 56.05
-       150,
-       180,
-'''
 
-'''
-    #activation : logistic(accuracy too low)
-    #             identity(0.5724) 235s
-                   tanh   （0.577）  190s
-    
-    #solver:       lbfgs(not applicable)
-                   sgd(too low)
-            #activation : logistic(accuracy too low)
-            #             identity(0.5724) 235s
-                           tanh   （0.577）  190s
-            
-            #solver:       lbfgs(not applicable)
-                           sgd(too low)
-'''
+
+
 
 
 # 13. 1  RandomForestClassifier（太慢了 跑不动）
