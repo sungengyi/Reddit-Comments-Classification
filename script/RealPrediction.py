@@ -23,6 +23,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 
 
@@ -192,6 +193,7 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 #------------------------------------------------------------------------------
 SGD_predicted = SGD_train_clf.predict(test_data_df['comments'])
 tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
+tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
 
 # 12. 1  MLPClassifier(需要调参！！！！)
 #------------------------------------------------------------------------------
@@ -214,10 +216,9 @@ print('-----Execute in {} sec'.format(finish_time - start_time))
 MLP_predicted = MLP_train_clf.predict(test_data_df['comments'])
 tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
 tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
+tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
 # 12. 4 calculate accuracy
 #------------------------------------------------------------------------------
-
-
 
 
 

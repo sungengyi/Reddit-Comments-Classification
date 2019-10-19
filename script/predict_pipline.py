@@ -323,7 +323,7 @@ KN_train_clf = Pipeline([
                        max_df = 0.4,
                        binary = True)),
         ('tfidf',TfidfTransformer()),
-        ('clf', KNeighborsClassifier(n_neighbors= 250)),
+        ('clf', KNeighborsClassifier(n_neighbors= 250，weights='uniform', algorithm='auto', n_jobs=-1)),
         ])
     
 # 7. 2 k-nearest neighbors: fitting
@@ -523,19 +523,10 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 #------------------------------------------------------------------------------
 
 MLP_train_clf = Pipeline([
-        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
-                       strip_accents = 'unicode',
-                       stop_words = 'english',
-                       lowercase = True,
-                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
-#                       max_df = 0.5,
-                       min_df = 1,
-                       binary = True)),
+        ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
-        ('clf', MLPClassifier(learning_rate ="invscaling",
-                              learning_rate_init = 0.004,
-                              max_iter = 1,
-                              verbose = True)),
+        ('clf', MLPClassifier(learning_rate ="adaptive")), # 122s 0.5651
+                                                            # 181s 0.5813
         ])
 '''
     #activation : logistic(accuracy too low)
