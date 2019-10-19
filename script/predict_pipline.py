@@ -40,7 +40,7 @@ from sklearn.dummy import DummyClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier
 
-num_test_data = 70000 
+num_test_data = 10000 
 def accuracy(predicted,true_outcome,num):
     accuracy = 0
     index = 0
@@ -83,16 +83,12 @@ def averageAcc(cv_results,fold):
 start_time = time.time()
 #load file
 #------------------------------------------------------------------------------
-training_data_df = pd.read_csv(r'../data/encoded_baozi.csv')
-test_data_df = pd.read_csv(r'../data/encoded_reddit_train.csv')
+training_data_df = pd.read_csv(r'../data/encoded_reddit_train.csv')
+test_data_df = pd.read_csv(r'../data/original_data/reddit_test.csv')
 finish_time = time.time()
 print("-----File Loaded in {} sec".format(finish_time - start_time))
 
-def process_junk(data):
-    data = data.sample(frac=1).reset_index(drop=True)
-    data = data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
-    data = data[data['comments'].apply(lambda x: len(str(x))>50)]
-    return data
+
 
 # 1. 1 multinomial naive bayes
 #------------------------------------------------------------------------------
@@ -110,18 +106,18 @@ mnb_train_clf = Pipeline([
 # 1. 2 multinomial naive bayes: fitting
 #------------------------------------------------------------------------------
 start_time = time.time()
-mnb_train_clf.fit(training_data_df['comments'],training_data_df['subreddit_encoding'])
+mnb_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
 finish_time = time.time()
 print("-----Execute in {} sec".format(finish_time - start_time))
 # 1. 3 multinomial naive bayes: predicting
 #------------------------------------------------------------------------------
-mnb_predicted = mnb_train_clf.predict(test_data_df['comments'])
+mnb_predicted = mnb_train_clf.predict(training_data_df['comments'][:num_test_data])
 tot_predicted=np.array([mnb_predicted])
 
 # 1. 4 calculate accuracy
 #------------------------------------------------------------------------------
 print("MNB")
-accuracy(mnb_predicted,test_data_df['subreddit_encoding'], num_test_data)
+accuracy(mnb_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 '''
  53.57 with binary = True, 53.85 with False, num_test_data = 30000
 1. -----Accuracy: 0.5557 / 10000
@@ -327,7 +323,7 @@ KN_train_clf = Pipeline([
                        max_df = 0.4,
                        binary = True)),
         ('tfidf',TfidfTransformer()),
-        ('clf', KNeighborsClassifier(n_neighbors= 250)),
+        ('clf', KNeighborsClassifier(n_neighbors= 250，weights='uniform', algorithm='auto', n_jobs=-1)),
         ])
     
 # 7. 2 k-nearest neighbors: fitting
@@ -525,21 +521,27 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 
 '''
 #------------------------------------------------------------------------------
+
 MLP_train_clf = Pipeline([
-        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
-                       strip_accents = 'unicode',
-                       stop_words = 'english',
-                       lowercase = True,
-                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
-                       max_df = 0.5,
-                       min_df = 1,
-                       binary = True)),
+        ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
-        ('clf', MLPClassifier(learning_rate ="adaptive",
-                              learning_rate_init = 0.004,
-                              max_iter = 3,
-                              verbose = True)),
+        ('clf', MLPClassifier(learning_rate ="adaptive")), # 122s 0.5651
+                                                            # 181s 0.5813
         ])
+'''
+    #activation : logistic(accuracy too low)
+    #             identity(0.5724) 235s
+                   tanh   （0.577）  190s
+    
+    #solver:       lbfgs(not applicable)
+                   sgd(too low)
+            #activation : logistic(accuracy too low)
+            #             identity(0.5724) 235s
+                           tanh   （0.577）  190s
+            
+            #solver:       lbfgs(not applicable)
+                           sgd(too low)
+'''
 # 12. 2   MLPClassifier: fitting
 #------------------------------------------------------------------------------
 print("----MLP: start executing...")
@@ -555,30 +557,9 @@ MLP_predicted = MLP_train_clf.predict(training_data_df['comments'][:num_test_dat
 #------------------------------------------------------------------------------
 accuracy(MLP_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
 
-'''
-Cooking Time : lemma, num 10000, learning rate 0.004
-    1. 60, 51.73
-        70, 5711
-       90, 54.79
-       120, 56.05
-       150,
-       180,
-'''
 
-'''
-    #activation : logistic(accuracy too low)
-    #             identity(0.5724) 235s
-                   tanh   （0.577）  190s
-    
-    #solver:       lbfgs(not applicable)
-                   sgd(too low)
-            #activation : logistic(accuracy too low)
-            #             identity(0.5724) 235s
-                           tanh   （0.577）  190s
-            
-            #solver:       lbfgs(not applicable)
-                           sgd(too low)
-'''
+
+
 
 
 # 13. 1  RandomForestClassifier（太慢了 跑不动）
@@ -593,7 +574,7 @@ RF_train_clf = Pipeline([
                        max_df = 0.5,
                        min_df = 1)),
         ('tfidf',TfidfTransformer()),
-        ('clf', RandomForestClassifier(n_estimators=150,n_jobs=3)),
+        ('clf', RandomForestClassifier(n_estimators=100,n_jobs=3)),
         ])
 # 13. 2   RandomForestClassifier: fitting
 #------------------------------------------------------------------------------

@@ -66,11 +66,11 @@ class LemmaTokenizer(object):
 #encode subreddit
 
 encode = []
-training_data_df = pd.read_csv('../data/baozi.csv')
-for subreddit in training_data_df['subreddit']:
+training_data_df = pd.read_csv('../data/original_data/reddit_train.csv')
+for subreddit in training_data_df['subreddits']:
     encode.append(encode_subreddit(subreddit))
 training_data_df['subreddit_encoding'] = encode
-training_data_df.to_csv(r'../data/encoded_baozi.csv',',')
+training_data_df.to_csv(r'../data/encoded_reddit_train.csv',',')
 
 
 

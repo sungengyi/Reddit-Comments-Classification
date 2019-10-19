@@ -164,7 +164,13 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
             # 6.1 SVM
             #------------------------------------------------------------------------------
             svm_train_clf= Pipeline([
-                    ('vect',CountVectorizer(binary = True)),
+                     ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
+                       strip_accents = 'unicode',
+                       stop_words = 'english',
+                       lowercase = True,
+                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
+                       max_df = 0.5,
+                       min_df = 1)),
                     ('tfidf',TfidfTransformer()),
                     ('clf', LinearSVC(C = 0.2)),
                     ])
@@ -221,7 +227,13 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
             # 8 1  SGDClassifier
             #------------------------------------------------------------------------------
             SGD_train_clf = Pipeline([
-                    ('vect',CountVectorizer()),
+                     ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
+                       strip_accents = 'unicode',
+                       stop_words = 'english',
+                       lowercase = True,
+                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
+                       max_df = 0.5,
+                       min_df = 1)),
                     ('tfidf',TfidfTransformer()),
                     ('clf', linear_model.SGDClassifier()),
                     ])
@@ -235,6 +247,7 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
             #------------------------------------------------------------------------------
             SGD_predicted = SGD_train_clf.predict(X_test)
             tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
+            tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
             # 8. 4 calculate accuracy
             #------------------------------------------------------------------------------
             print(iter_num,"SGD")
@@ -245,9 +258,12 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
             #------------------------------------------------------------------------------
             
             MLP_train_clf = Pipeline([
-                    ('vect',CountVectorizer()),
-                    ('tfidf',TfidfTransformer()),
-                    ('clf', MLPClassifier(learning_rate ="adaptive")),
+                      ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+                    ('clf', MLPClassifier(learning_rate ="invscaling",
+                              learning_rate_init = 0.004,
+                              max_iter = 1,
+                              verbose = True)),
                     ])
             # 12. 2   MLPClassifier: fitting
             #------------------------------------------------------------------------------
@@ -261,21 +277,23 @@ def VoteAndCrossValidate(X,Y,splits,num_data):
             #------------------------------------------------------------------------------
             MLP_predicted = MLP_train_clf.predict(X_test)
             tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
+            tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
             # 12. 4 calculate accuracy
             #------------------------------------------------------------------------------
             print(iter_num,"MLP")
             accuracy(MLP_predicted,y_test,num_data,index)
             
             
+           
 
         
             
-            vp = votepredict(tot_predicted)
-            print(iter_num,"Vote")
-            
-            final_acc +=accuracy(vp,y_test,num_data,index)
-            index+=num_data
-            iter_num+=1
+        vp = votepredict(tot_predicted)
+        print(iter_num,"Vote")
+        
+        final_acc +=accuracy(vp,y_test,num_data,index)
+        index+=num_data
+        iter_num+=1
         print("Final acc:",final_acc / splits)  
         return final_acc / splits
 

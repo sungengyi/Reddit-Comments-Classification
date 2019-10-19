@@ -23,6 +23,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 
 
@@ -192,24 +193,15 @@ print("-----Execute in {} sec".format(finish_time - start_time))
 #------------------------------------------------------------------------------
 SGD_predicted = SGD_train_clf.predict(test_data_df['comments'])
 tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
+tot_predicted=np.append(tot_predicted,[SGD_predicted],axis=0)
 
 # 12. 1  MLPClassifier(需要调参！！！！)
 #------------------------------------------------------------------------------
 
 MLP_train_clf = Pipeline([
-        ('vect',CountVectorizer(tokenizer=LemmaTokenizer(),
-                       strip_accents = 'unicode',
-                       stop_words = 'english',
-                       lowercase = True,
-                       token_pattern = r'\b[a-zA-Z]{3,}\b', # keeps words of 3 or more characters
-                       max_df = 0.5,
-                       min_df = 1,
-                       binary = True)),
+        ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
-        ('clf', MLPClassifier(learning_rate ="invscaling",
-                              learning_rate_init = 0.004,
-                              max_iter = 1,
-                              verbose = True)),
+        ('clf', MLPClassifier(learning_rate ="adaptive")),
         ])
 # 12. 2   MLPClassifier: fitting
 #------------------------------------------------------------------------------
@@ -224,10 +216,10 @@ print('-----Execute in {} sec'.format(finish_time - start_time))
 MLP_predicted = MLP_train_clf.predict(test_data_df['comments'])
 tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
 tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
+tot_predicted=np.append(tot_predicted,[MLP_predicted],axis=0)
 # 12. 4 calculate accuracy
 #------------------------------------------------------------------------------
 
-tot_predicted = tot_predicted[:-2]
 
 
 
