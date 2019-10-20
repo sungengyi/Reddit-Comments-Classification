@@ -30,6 +30,7 @@ from sklearn.feature_extraction.text import TfidfTransformer
 
 #import models
 from sklearn.svm import LinearSVC
+from sklearn import tree
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from NaiveBayes import NaiveBayes
@@ -78,6 +79,7 @@ def averageAcc(cv_results,fold):
         average+=number
     average /= fold   
     print("Cross-validate",fold,"folds accuracy is:",average)
+    return average
 
  
 start_time = time.time()
@@ -163,30 +165,33 @@ tokenizer=LemmaTokenizer(),
 
 '''
 
-#
-## 2. 1 decision tree
-##------------------------------------------------------------------------------
-#dct_train_clf = Pipeline([
-#        ('vect',CountVectorizer()),
-#        ('tfidf',TfidfTransformer()),
-#        ('clf', tree.DecisionTreeRegressor()),
-#        ])
-## 2. 2 decision tree: fitting
-##------------------------------------------------------------------------------
-#start_time = time.time()
-#dct_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
-#finish_time = time.time()
-#print("-----Execute in {} sec".format(finish_time - start_time))
-##
-#
-## 2. 3 decision tree: predicting
-##------------------------------------------------------------------------------
-#dct_predicted = dct_train_clf.predict(training_data_df['comments'][:num_test_data])
-## 2. 4 calculate accuracy
-##------------------------------------------------------------------------------
-#accuracy(dct_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+
+# 2. 1 decision tree
+#------------------------------------------------------------------------------
+dct_train_clf = Pipeline([
+        ('vect',CountVectorizer()),
+        ('tfidf',TfidfTransformer()),
+        ('clf', tree.DecisionTreeRegressor()),
+        ])
+# 2. 2 decision tree: fitting
+#------------------------------------------------------------------------------
+start_time = time.time()
+dct_train_clf.fit(training_data_df['comments'][num_test_data:],training_data_df['subreddit_encoding'][num_test_data:])
+finish_time = time.time()
+print("-----Execute in {} sec".format(finish_time - start_time))
 #
 
+# 2. 3 decision tree: predicting
+#------------------------------------------------------------------------------
+dct_predicted = dct_train_clf.predict(training_data_df['comments'][:num_test_data])
+# 2. 4 calculate accuracy
+#------------------------------------------------------------------------------
+accuracy(dct_predicted,training_data_df['subreddit_encoding'][:num_test_data], num_test_data)
+
+'''
+-----Execute in 143.38194942474365 sec
+-----Accuracy: 0.1675
+'''
 
 
 
@@ -323,7 +328,10 @@ KN_train_clf = Pipeline([
                        max_df = 0.4,
                        binary = True)),
         ('tfidf',TfidfTransformer()),
-        ('clf', KNeighborsClassifier(n_neighbors= 250，weights='uniform', algorithm='auto', n_jobs=-1)),
+        ('clf', KNeighborsClassifier(n_neighbors= 250,
+                                     weights='uniform',
+                                     algorithm='auto',
+                                     n_jobs=-1)),
         ])
     
 # 7. 2 k-nearest neighbors: fitting
@@ -525,7 +533,9 @@ accuracy(DC_predicted,training_data_df['subreddit_encoding'][:num_test_data], nu
 MLP_train_clf = Pipeline([
         ('vect',CountVectorizer()),
         ('tfidf',TfidfTransformer()),
-        ('clf', MLPClassifier(learning_rate ="adaptive")), # 122s 0.5651
+        ('clf', MLPClassifier(learning_rate ="invscaling",
+                              learning_rate_init = 0.004,
+                              max_iter = 1)), # 122s 0.5651
                                                             # 181s 0.5813
         ])
 '''
@@ -604,52 +614,126 @@ RF_train_clf = Pipeline([
 
 
 
-#
-## -----------------------------------------------------------------------------
-##VALIDATE
-##------------------------------------------------------------------------------
-## Logistic Regression
-#lr_cv_results = cross_validate(lr_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
-#sorted(lr_cv_results.keys())
-#lr_cv_results['fit_time']
-#lr_cv_results['test_score']
-#
-##------------------------------------------------------------------------------
-## Multiclass Naive Bayes
-#mnb_cv_results = cross_validate(mnb_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
-#sorted(mnb_cv_results.keys())
-#mnb_cv_results['fit_time']
-#mnb_cv_results['test_score']
-#averageAcc(mnb_cv_results['test_score'],7)
-#
-##------------------------------------------------------------------------------
-## Support Vector Machine
-#svm_cv_results = cross_validate(svm_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
-#sorted(svm_cv_results.keys())
-#svm_cv_results['fit_time']
-#svm_cv_results['test_score']
-#averageAcc(svm_cv_results['test_score'],7)
-#'''
-#1. Cross-validate 7 folds accuracy is: 0.5720285714285714: binary = true num 30000
-#    
-#'''
-#
-##------------------------------------------------------------------------------
-## K's Nearest 
-#kn_cv_results = cross_validate(KN_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
-#sorted(kn_cv_results.keys())
-#kn_cv_results['fit_time']
-#kn_cv_results['test_score']
-#averageAcc(kn_cv_results['test_score'],7)
-#
-##------------------------------------------------------------------------------
-## SGD
-#sgd_cv_results = cross_validate(SGD_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
-#sorted(sgd_cv_results.keys())
-#sgd_cv_results['fit_time']
-#sgd_cv_results['test_score']
-#averageAcc(sgd_cv_results['test_score'],7)
-#
+
+# -----------------------------------------------------------------------------
+#VALIDATE
+#------------------------------------------------------------------------------
+# Logistic Regression
+lr_cv_results = cross_validate(lr_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
+sorted(lr_cv_results.keys())
+lr_cv_results['fit_time']
+lr_cv_results['test_score']
+print("LR")
+averageAcc(lr_cv_results['test_score'],7)
+#Cross-validate 7 folds accuracy is: 0.5447571428571428
+
+#------------------------------------------------------------------------------
+# Multiclass Naive Bayes
+mnb_cv_results = cross_validate(mnb_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
+sorted(mnb_cv_results.keys())
+mnb_cv_results['fit_time']
+mnb_cv_results['test_score']
+print("MNB")
+averageAcc(mnb_cv_results['test_score'],7)
+
+#------------------------------------------------------------------------------
+# Support Vector Machine
+svm_cv_results = cross_validate(svm_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
+sorted(svm_cv_results.keys())
+svm_cv_results['fit_time']
+svm_cv_results['test_score']
+print("SVM")
+averageAcc(svm_cv_results['test_score'],7)
+'''
+1. Cross-validate 7 folds accuracy is: 0.5720285714285714: binary = true num 30000
+    #'''
+
+#------------------------------------------------------------------------------
+# K's Nearest 
+kn_cv_results = cross_validate(KN_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
+sorted(kn_cv_results.keys())
+kn_cv_results['fit_time']
+kn_cv_results['test_score']
+print("KN")
+averageAcc(kn_cv_results['test_score'],7)
+
+#------------------------------------------------------------------------------
+# SGD
+sgd_cv_results = cross_validate(SGD_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
+sorted(sgd_cv_results.keys())
+sgd_cv_results['fit_time']
+sgd_cv_results['test_score']
+print("SGD")
+averageAcc(sgd_cv_results['test_score'],7)
+
+#------------------------------------------------------------------------------
+# ADA
+ada_cv_results = cross_validate(ADA_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
+sorted(ada_cv_results.keys())
+ada_cv_results['fit_time']
+ada_cv_results['test_score']
+print("ADA")
+averageAcc(ada_cv_results['test_score'],7)
+
+
+#------------------------------------------------------------------------------
+# DCT
+dct_cv_results = cross_validate(dct_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
+sorted(dct_cv_results.keys())
+dct_cv_results['fit_time']
+dct_cv_results['test_score']
+print("DCT")
+averageAcc(dct_cv_results['test_score'],7)
+
+
+
+#------------------------------------------------------------------------------
+# MLP
+mlp_cv_results = cross_validate(MLP_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
+sorted(mlp_cv_results.keys())
+mlp_cv_results['fit_time']
+mlp_cv_results['test_score']
+print("MLP")
+averageAcc(mlp_cv_results['test_score'],7)
+#------------------------------------------------------------------------------
+# MLP
+rf_cv_results = cross_validate(RF_train_clf,training_data_df['comments'],training_data_df['subreddit_encoding'],cv = 7)
+sorted(rf_cv_results.keys())
+rf_cv_results['fit_time']
+rf_cv_results['test_score']
+print("MLP")
+averageAcc(rf_cv_results['fit_time'],7)
+
+
+
+
+results = [dct_cv_results, kn_cv_results, lr_cv_results,
+           mlp_cv_results, mnb_cv_results,
+           rf_cv_results, sgd_cv_results, svm_cv_results]
+fit_time = []
+score_time = []
+score = []
+overall = []
+label = ["fit_time","score_time","overall","accuracy"]
+for element in results:
+    fit_time.append(averageAcc(element['fit_time'],7))
+    score_time.append(averageAcc(element['score_time'],7))
+    overall.append(averageAcc(element['fit_time'],7)+averageAcc(element['score_time'],7))
+    score.append(100*averageAcc(element['test_score'],7))
+
+model = ["DT","Kn","LR","MLP","MNB","RF","SGD","SVM"]
+fig,ax = plt.subplots()
+ax.plot(model,fit_time,label = "fit_time")
+ax.plot(model,score_time,label = "score_time")
+ax.plot(model,overall,label = "overall")
+ax.legend()
+plt.show()
+ 
+
+
+
+
+
 
 vp = votepredict(tot_predicted)
 print("Vote")
